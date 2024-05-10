@@ -14,8 +14,8 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import random
 
-def login(driver : webdriver.Chrome, accountUsername : str, password : str, username : str):
-    """Logs the user into thier IMDB account.
+def login(driver : webdriver, accountUsername : str, password : str, username : str):
+    """Logs the user into their IMDB account.
 
     Args:
         accountUsername (str): the username of the account (email phone number etc, used to login).
@@ -61,11 +61,7 @@ def login(driver : webdriver.Chrome, accountUsername : str, password : str, user
             loggedInUserElement = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[5]/div/label[2]/span/span")))
             #this should never happen unless the user gives the wrong username
             assert loggedInUserElement.text == username
-            print("Everything worked logged in successfully")
             pass 
-
-
-    
 
 
 def isLoggedIn(driver : webdriver) -> bool:
