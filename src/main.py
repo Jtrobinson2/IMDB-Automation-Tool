@@ -12,4 +12,5 @@ chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 driver = webdriver.Chrome(options=chrome_options)
 
 web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
+assert web_actions.isLoggedIn(driver)
 

@@ -51,17 +51,17 @@ def login(driver : webdriver, accountUsername : str, password : str, username : 
     try:
         loginErrorElement = driver.find_element(By.CLASS_NAME, "a-list-item")
         raise LoginError(f"Error logging in: {loginErrorElement.text}")
-    except:
+    except NoSuchElementException:
         #check if IMDB detected you as a bot despite a successful login
         try:
             #this element only appears if imdb thinks your a bot
             driver.find_element(By.CLASS_NAME, "a-size-large")
             raise LoginError(f"Error logging in you must login manually")
-        except:
+        except NoSuchElementException:
+            #make sure we're logged into the correct user
             loggedInUserElement = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[5]/div/label[2]/span/span")))
             #this should never happen unless the user gives the wrong username
             assert loggedInUserElement.text == username
-            pass 
 
 
 def isLoggedIn(driver : webdriver) -> bool:
@@ -76,7 +76,17 @@ def isLoggedIn(driver : webdriver) -> bool:
     Raises: 
         ValueError: If the webdriver is None 
     """
-    pass 
+    if(not driver):
+        raise ValueError("Error: Please Provide a valid driver")
+    
+    try:
+        driver.get(endpoints.IMDB_HOME_PAGE)
+        driver.find_element(By.XPATH, "//*[@id='imdbHeader']/div[2]/div[5]/div/label[2]/span/span")
+        return True
+    except NoSuchElementException:
+        return False
+    
+
 
 
 def submitReview(driver : webdriver, review : Review):
