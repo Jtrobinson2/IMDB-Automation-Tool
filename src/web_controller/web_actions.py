@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import random
+import re
 
 def login(driver : webdriver, accountUsername : str, password : str, username : str):
     """Logs the user into their IMDB account.
@@ -157,6 +158,27 @@ def removeReviewMarkup(reviewBody : str) -> str:
         ValueError: If reviewBody is empty or none
     """  
     pass
+
+def validateMarkup(markupString : str) -> bool:
+    """Validates that the markup is correct (all opening tags and closing tags are correct)
+
+    Args:
+        markupString (str): markup string 
+
+    Returns:
+        Bool: True if the markup string is valid 
+
+    Raises:
+        ValueError: If markupString is empty or none
+    """  
+
+    if(not markupString):
+        raise ValueError("Error: please provide a markup string")
+    
+    #match all [spoiler],  [/spoiler] or [b] [/b] tags into one group, while "matching" (skipping) all the characters between the opening and closing tags
+    pattern = r'\[(spoiler|b)\].*?\[\/\1\]'
+    # TODO test this regex
+    return all(re.findall(pattern, markupString))
 
 
 def sendKeysLikeHuman(keys : str, driver : webdriver, inputElement : WebElement):
