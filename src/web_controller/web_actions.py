@@ -3,26 +3,39 @@
 from model.review import Review
 from util import endpoints
 from selenium import webdriver
+from model.login_error import LoginError
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.webelement import WebElement 
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import random
 
-def login(driver : webdriver.Chrome, username : str, password : str):
+def login(driver : webdriver.Chrome, accountUsername : str, password : str, username : str):
     """Logs the user into thier IMDB account.
 
     Args:
-        username (str): the user's name.
-        password (str): the user's password.
+        accountUsername (str): the username of the account (email phone number etc, used to login).
+        password (str): the user's account password.
+        username (str): the username of the imdb profile (post login).
         driver (webdriver): the web driver to perform the actions
 
     Raises:
-        ValueError: If user name is None or Empty.
+        ValueError: If accountUsername is None or Empty.
+        ValueError: If username is None or Empty.
         ValueError: If password is None or Empty. 
-        ValueError: If the webdriver is None 
+        ValueError: If the webdriver is None
+        ValueError: If the login failed for any reason 
     """
     if(not driver):
         raise ValueError("Error: Please Provide a valid driver")
     if(not username):
         raise ValueError("Error: username cannot be null or empty")
+    if(not accountUsername):
+        raise ValueError("Error: account username cannot be null or empty")
     if(not password):
         raise ValueError("Error: password cannot be null or empty")
     
@@ -30,9 +43,29 @@ def login(driver : webdriver.Chrome, username : str, password : str):
     usernameInputField = driver.find_element(By.XPATH, "//*[@id='ap_email']")
     passwordInputField = driver.find_element(By.XPATH, "//*[@id='ap_password']")
     signInButton = driver.find_element(By.ID, "signInSubmit")
-    usernameInputField.send_keys(username)
-    passwordInputField.send_keys(password)
+    sendKeysLikeHuman(accountUsername, driver, usernameInputField)
+    sendKeysLikeHuman(password, driver, passwordInputField)
     signInButton.click()
+
+    #check that the login didn't fail
+    try:
+        loginErrorElement = driver.find_element(By.CLASS_NAME, "a-list-item")
+        raise LoginError(f"Error logging in: {loginErrorElement.text}")
+    except:
+        #check if IMDB detected you as a bot despite a successful login
+        try:
+            #this element only appears if imdb thinks your a bot
+            driver.find_element(By.CLASS_NAME, "a-size-large")
+            raise LoginError(f"Error logging in you must login manually")
+        except:
+            loggedInUserElement = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[5]/div/label[2]/span/span")))
+            #this should never happen unless the user gives the wrong username
+            assert loggedInUserElement.text == username
+            print("Everything worked logged in successfully")
+            pass 
+
+
+    
 
 
 def isLoggedIn(driver : webdriver) -> bool:
@@ -118,5 +151,43 @@ def removeReviewMarkup(reviewBody : str) -> str:
         ValueError: If reviewBody is empty or none
     """  
     pass
+
+
+def sendKeysLikeHuman(keys : str, driver : webdriver, inputElement : WebElement):
+    """Sends keys to an input field in a human like way to avoid websites bot detection
+
+    Args:
+        keys (str): keys to send
+        driver (webdriver): web driver to execute the action
+        inputElement (WebElement): the input field  
+
+    Raises:
+        ValueError: If keys are empty or none
+        ValueError: If webDriver is none
+        ValueError: If inputElement is none
+    """  
+
+    if(not keys):
+        raise ValueError("Error: you must submit something for the keys")
+    if(not driver):
+        raise ValueError("Error: you must provide a web driver")
+    if(not inputElement):
+        raise ValueError("Error: you must provide the the input element")
+
+    #move to the input element in a human way before sending the keys
+    actions = ActionChains(driver)
+    actions.move_to_element_with_offset(inputElement, int(random.uniform(1,3)), int(random.uniform(1,3)))
+    actions.click()
+    actions.perform()
+
+    #mimics a human pause between keystrokes
+    for character in keys:
+        actions.send_keys(character)
+        actions.perform()
+        time.sleep(random.uniform(0.1,0.2))
+
+    
+
+
 
 
