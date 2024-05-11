@@ -118,19 +118,7 @@ def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
     """  
     pass
 
-def isReviewValid(review : Review):
-    """Checks the fields of a review to ensure they are valid for submission
 
-    Args:
-        review (Review): review to verify 
-
-    Raises:
-        ValueError: If review's headline is none, empty, or contains profanity or markup.
-        ValueError: If review's review body is none, empty, or contains profanity or invalid markup.
-        ValueError: If review's not demarked as either a movie or tv show or both.
-        ValueError: if reviews review body is < 600 characters
-    """  
-    pass 
 
 def removeFromWatchList(driver : webdriver, cinemaItemTitle : str):
     """Removes a cinema item from the users watchlist
@@ -145,40 +133,6 @@ def removeFromWatchList(driver : webdriver, cinemaItemTitle : str):
     """  
     pass
 
-def removeReviewMarkup(reviewBody : str) -> str:
-    """Removes the markup (spoiler tags n such) from a review
-
-    Args:
-        reviewBody (str): review body of a review 
-
-    Returns:
-        str: cleaned string without markup for review 
-
-    Raises:
-        ValueError: If reviewBody is empty or none
-    """  
-    pass
-
-def validateMarkup(markupString : str) -> bool:
-    """Validates that the markup is correct (all opening tags and closing tags are correct)
-
-    Args:
-        markupString (str): markup string 
-
-    Returns:
-        Bool: True if the markup string is valid 
-
-    Raises:
-        ValueError: If markupString is empty or none
-    """  
-
-    if(not markupString):
-        raise ValueError("Error: please provide a markup string")
-    
-    #match all [spoiler],  [/spoiler] or [b] [/b] tags into one group, while "matching" (skipping) all the characters between the opening and closing tags
-    pattern = r'\[(spoiler|b)\].*?\[\/\1\]'
-    # TODO test this regex
-    return all(re.findall(pattern, markupString))
 
 
 def sendKeysLikeHuman(keys : str, driver : webdriver, inputElement : WebElement):
