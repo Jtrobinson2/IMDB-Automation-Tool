@@ -16,12 +16,12 @@ class TestReviewUtil:
 
 
         assert review_util.validateMarkup(validMarkupWithTags, 1)
-        # assert review_util.validateMarkup(validMarkupWithoutTags, 1)
-        # assert not review_util.validateMarkup(invalidMarkupIsProfane, 1)
-        # assert not review_util.validateMarkup(invalidMarkupToShort, 2)
-        # assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTag, 1)
-        # assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTagType, 1)
-        # assert not review_util.validateMarkup(invalidMarkupWithNoClosingTags, 1)
+        assert review_util.validateMarkup(validMarkupWithoutTags, 1)
+        assert not review_util.validateMarkup(invalidMarkupIsProfane, 1)
+        assert not review_util.validateMarkup(invalidMarkupToShort, 2)
+        assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTag, 1)
+        assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTagType, 1)
+        assert not review_util.validateMarkup(invalidMarkupWithNoClosingTags, 1)
 
         with pytest.raises(ValueError) as error:  
             review_util.validateMarkup(None, 1)
