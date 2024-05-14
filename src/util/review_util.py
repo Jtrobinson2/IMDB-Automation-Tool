@@ -26,17 +26,18 @@ def removeReviewMarkup(reviewBody : str, tagsToRemove : set[str]) -> str:
     for tag in tagsToRemove: reviewBody = reviewBody.replace(tag, "")
     return reviewBody
 
-def isReviewValid(review : Review):
-    """Checks the fields of a review to ensure they are valid for submission
+def isReviewValid(review : Review, validTags = set[str], minReviewLength=600) -> tuple[bool, str]:
+    """Checks the fields of a review to ensure they are valid for submission no profanity valid tags etc.
 
     Args:
         review (Review): review to verify 
+        validTags set[str] : valid tags that can occur in the review body
 
     Raises:
         ValueError: If review's headline is none, empty, or contains profanity or markup.
         ValueError: If review's review body is none, empty, or contains profanity or invalid markup.
         ValueError: If review's not demarked as either a movie or tv show or both.
-        ValueError: if reviews review body is < 600 characters
+        ValueError: if reviews review body is < the minimum review character cutoff for IMDB 
     """ 
     if(not review.headline):
         raise ValueError("Error: review must have a headline.")
@@ -45,9 +46,19 @@ def isReviewValid(review : Review):
     if(not review.isMovie and not review.isTVShow):
         raise ValueError("Error: review must be marked as either a TV show or a Movie.")
 
-    # if(validateMarkup(review.reviewBody, ))
+    if(not validateMarkup(review.reviewBody)):
+        return False, "Error: Invalid Markup"
+    if(profanity.contains_profanity(review.reviewBody) or profanity.contains_profanity(review.headline)):
+        return False, "Error: review's cannot contain profanity."
+    
+    
+    review.reviewBody = removeReviewMarkup(review.reviewBody, validTags)
 
-    pass 
+    if(len(review.reviewBody) < minReviewLength):
+        return False, "Error, review is smaller than the min review length allowed on IMDB."
+    
+    return True
+
 
 def validateMarkup(markupString : str) -> bool:
     """Validates that the markup is correct (all opening tags and closing tags are correct). 
@@ -63,8 +74,7 @@ def validateMarkup(markupString : str) -> bool:
     """  
     if(not markupString):
         raise ValueError("Error: please provide a markup string")
-    if(profanity.contains_profanity(markupString)):
-        return False
+
     
     tagsMap = {'[/spoiler]': '[spoiler]', '[/b]': '[b]'}
     
