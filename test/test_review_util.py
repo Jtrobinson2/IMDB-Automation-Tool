@@ -7,21 +7,31 @@ from src.util import review_util
 class TestReviewUtil:
 
     def test_validate_markup(self):
+        validTagsMap = tagsMap = {'[/spoiler]': '[spoiler]', '[/b]': '[b]'}
+    
         validMarkupWithTags = r"""[b]Rating: 10.0[/b] [b]Kyoshi Novels Rating: 9.0[/b] [b]Favourite Episode: Sozin's Comet parts 2-4[/b] Most well-written children's animated show to date. The Series deserves the hype despite it starting out "kiddie" until around episode 3 where [spoiler] The genocide [/spoiler]"""
         validMarkupWithoutTags = r"This is a valid review without tags"
         invalidMarkupWithInvalidClosingTag = r"[b]Rating: 10.0[//b] [b]Kyoshi Novels Rating: 9.0[/b]"
         invalidMarkupWithInvalidClosingTagType = r"[b]Rating: 10.0[/spoiler] [b]Kyoshi Novels Rating: 9.0[/b]"
         invalidMarkupWithNoClosingTags = r"[b]Rating: 10.0[b] [b]Kyoshi Novels Rating: 9.0[/b]"
-        
-        assert review_util.validateMarkup(validMarkupWithTags)
-        assert review_util.validateMarkup(validMarkupWithoutTags)
-        assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTag)
-        assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTagType)
-        assert not review_util.validateMarkup(invalidMarkupWithNoClosingTags)
+
+        assert review_util.validateMarkup(validMarkupWithTags, validTagsMap)
+        assert review_util.validateMarkup(validMarkupWithoutTags, validTagsMap)
+        assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTag, validTagsMap)
+        assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTagType, validTagsMap)
+        assert not review_util.validateMarkup(invalidMarkupWithNoClosingTags, validTagsMap)
 
         with pytest.raises(ValueError) as error:  
-            review_util.validateMarkup(None)
+            review_util.validateMarkup(None, validTagsMap)
         assert str(error.value) == "Error: please provide a markup string"
+        
+        with pytest.raises(ValueError) as error:  
+            review_util.validateMarkup("Markup ", None)
+        assert str(error.value) == "Error: to validate markup we need the tags that are considered valid."
+
+        with pytest.raises(ValueError) as error:  
+            review_util.validateMarkup("Markup ", dict())
+        assert str(error.value) == "Error: to validate markup we need the tags that are considered valid."        
 
     def test_removeMarkup(self):
         markupPreRemoval = " [b]Rating: 10.0[/b]\n[b]Kyoshi Novels Rating: 9.0[/b]\n[spoiler]The genocide[/spoiler] "
@@ -47,7 +57,7 @@ class TestReviewUtil:
         assert str(error.value) == "Error: you must provide at least one type of tag you want to remove"
     
     def testIsReviewValid(self):
-        validTagsSet = {"[spoiler]", "[/spoiler]", "[b]", "[/b]"}
+        validTags = {"[/spoiler]" : "[spoiler]", "[/b]": "[b]"}
         validReview = Review("Clean Headline", "Clean ReviewBody", True, False, True)
         invalidReviewProfaneHeadline = Review("Profane ass headline you CUCK!", "Clean ReviewBody", True, False, True)
         invalidReviewProfaneBody = Review("Clean Headline", "Profane as fuck body", True, False, True)
@@ -59,35 +69,35 @@ class TestReviewUtil:
         invalidReviewBadMarkup = Review("Clean Headline", "This has [b] bad markup [b] [/spoiler] [spoiiler] [/b]", True, False, True)
         invalidReviewTooShort = Review(".", ".", True, False, True)
 
-        assert review_util.isReviewValid(validReview, validTagsSet, 1)
+        assert review_util.isReviewValid(validReview, validTags, 1)
 
-        assert not review_util.isReviewValid(invalidReviewProfaneHeadline, validTagsSet, 1)[0]
-        assert "Error: review's cannot contain profanity." == review_util.isReviewValid(invalidReviewProfaneHeadline, validTagsSet, 1)[1]
-        assert not review_util.isReviewValid(invalidReviewProfaneBody, validTagsSet, 1)[0]
-        assert "Error: review's cannot contain profanity." == review_util.isReviewValid(invalidReviewProfaneBody, validTagsSet, 1)[1]
-        assert not review_util.isReviewValid(invalidReviewBadMarkup, validTagsSet, 1)[0]
-        assert "Error: Invalid Markup" == review_util.isReviewValid(invalidReviewBadMarkup, validTagsSet, 1)[1]
-        assert not review_util.isReviewValid(invalidReviewTooShort, validTagsSet, 2)[0]
-        assert "Error, review is smaller than the min review length allowed on IMDB." == review_util.isReviewValid(invalidReviewTooShort, validTagsSet, 2)[1]
+        assert not review_util.isReviewValid(invalidReviewProfaneHeadline, validTags, 1)[0]
+        assert "Error: review's cannot contain profanity." == review_util.isReviewValid(invalidReviewProfaneHeadline, validTags, 1)[1]
+        assert not review_util.isReviewValid(invalidReviewProfaneBody, validTags, 1)[0]
+        assert "Error: review's cannot contain profanity." == review_util.isReviewValid(invalidReviewProfaneBody, validTags, 1)[1]
+        assert not review_util.isReviewValid(invalidReviewBadMarkup, validTags, 1)[0]
+        assert "Error: Invalid Markup" == review_util.isReviewValid(invalidReviewBadMarkup, validTags, 1)[1]
+        assert not review_util.isReviewValid(invalidReviewTooShort, validTags, 2)[0]
+        assert "Error, review is smaller than the min review length allowed on IMDB." == review_util.isReviewValid(invalidReviewTooShort, validTags, 2)[1]
 
         with pytest.raises(ValueError) as error:  
-            review_util.isReviewValid(invalidReviewEmptyHeadline, validTagsSet, 1)
+            review_util.isReviewValid(invalidReviewEmptyHeadline, validTags, 1)
         assert str(error.value) == "Error: review must have a headline."
 
         with pytest.raises(ValueError) as error:  
-            review_util.isReviewValid(invalidReviewNoneHeadline, validTagsSet, 1)
+            review_util.isReviewValid(invalidReviewNoneHeadline, validTags, 1)
         assert str(error.value) == "Error: review must have a headline."
 
         with pytest.raises(ValueError) as error:  
-            review_util.isReviewValid(invalidReviewEmptyBody, validTagsSet, 1)
+            review_util.isReviewValid(invalidReviewEmptyBody, validTags, 1)
         assert str(error.value) == "Error: review must have a review body."        
 
         with pytest.raises(ValueError) as error:  
-            review_util.isReviewValid(invalidReviewNoneBody, validTagsSet, 1)
+            review_util.isReviewValid(invalidReviewNoneBody, validTags, 1)
         assert str(error.value) == "Error: review must have a review body."
 
         with pytest.raises(ValueError) as error:  
-            review_util.isReviewValid(invalidReviewNotShowOrMovie, validTagsSet, 1)
+            review_util.isReviewValid(invalidReviewNotShowOrMovie, validTags, 1)
         assert str(error.value) == "Error: review must be marked as either a TV show or a Movie."
                                 
         
