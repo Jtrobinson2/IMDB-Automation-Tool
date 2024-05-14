@@ -1,6 +1,7 @@
 """Module that contains all of the web actions from logging in to submitting a review that automation tool will need.
 """
 from model.review import Review
+from model import watchlist_item_not_found_error
 from util import endpoints
 from selenium import webdriver
 from model.login_error import LoginError
@@ -13,7 +14,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import random
-import re
+
 
 def login(driver : webdriver, accountUsername : str, password : str, username : str):
     """Logs the user into their IMDB account.
@@ -120,19 +121,63 @@ def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
 
 
 
-def removeFromWatchList(driver : webdriver, cinemaItemTitle : str):
+def removeFromWatchList(driver : webdriver.Chrome, cinemaItemTitle : str) -> bool :
     """Removes a cinema item from the users watchlist
 
     Args:
         cinemaItemTitle (str): title of cinema item to remove from watch list
         driver (webdriver): the web driver to perform the actions 
 
+    Returns:
+        bool: if item was able to be removed from watchlist
+
     Raises:
         WatchListItemNotFoundError: If cinema item wasn't in the watchlist
         ValueError: If the webdriver is None 
+        ValueError: If user is not logged in
+          
     """  
-    pass
 
+    if(not driver):
+        raise ValueError("Error: provide a valid driver")
+    if(not isLoggedIn(driver)):
+        raise ValueError("Error: nobody is logged in cannot remove from watchlist.")
+    
+    driver.get(endpoints.IMDB_HOME_PAGE)
+
+    #TODO: get watchlist size pre removal
+    watchListSizePrior = int(driver.find_element(By.XPATH, "//*[@id='imdbHeader'']/div[2]/div[4]/a/span/span").text)
+    
+
+    actions = ActionChains(driver)
+    watchlistButton = driver.find_element(By.XPATH, "//*[@id='imdbHeader']/div[2]/div[4]/a")
+    actions.move_to_element_with_offset(watchlistButton, int(random.uniform(1,3)), int(random.uniform(1,3)))
+    actions.click()
+    actions.perform()
+
+    #wait till the watchlist screen loads up if this doesn't work with implicit wait
+
+    watchlistContainer = driver.find_element(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[2]/ul")
+    watchListItems = watchlistContainer.find_elements(By.TAG_NAME, "li")
+    
+    for item in watchListItems:
+        #TODO this is the class name of the tag a tag within the watch list items whose text has the title of the item ipc-title-link-wrapper
+        #TODO replace all substring finds with in keyword instead 
+        #TODO test this
+        watchListItemName = item.find_element(By.CLASS_NAME, "ipc-title-link-wrapper").text
+        if(watchListItemName in cinemaItemTitle):
+            watchListRemoveButton = item.find_element(By.CLASS_NAME, "ipc-watchlist-ribbon ipc-focusable ipc-watchlist-ribbon--s ipc-watchlist-ribbon--base ipc-watchlist-ribbon--onImage ipc-watchlist-ribbon--inWatchlist ipc-poster__watchlist-ribbon")
+            actions.move_to_element_with_offset(watchListRemoveButton, int(random.uniform(1,3)), int(random.uniform(1,3)))
+            actions.click()
+            actions.perform()
+            watchlistSizeNow = int(driver.find_element(By.XPATH, "//*[@id='imdbHeader'']/div[2]/div[4]/a/span/span").text)
+            return watchListSizePrior - 1 == watchlistSizeNow 
+    
+    raise watchlist_item_not_found_error() 
+
+
+
+    
 
 
 def sendKeysLikeHuman(keys : str, driver : webdriver, inputElement : WebElement):
