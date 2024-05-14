@@ -11,20 +11,18 @@ class TestReviewUtil:
         invalidMarkupWithInvalidClosingTag = r"[b]Rating: 10.0[//b] [b]Kyoshi Novels Rating: 9.0[/b]"
         invalidMarkupWithInvalidClosingTagType = r"[b]Rating: 10.0[/spoiler] [b]Kyoshi Novels Rating: 9.0[/b]"
         invalidMarkupWithNoClosingTags = r"[b]Rating: 10.0[b] [b]Kyoshi Novels Rating: 9.0[/b]"
-        invalidMarkupToShort = "L"
         invalidMarkupIsProfane = "The string was normal until....Cock sucking ass bitch!!"
 
 
-        assert review_util.validateMarkup(validMarkupWithTags, 1)
-        assert review_util.validateMarkup(validMarkupWithoutTags, 1)
-        assert not review_util.validateMarkup(invalidMarkupIsProfane, 1)
-        assert not review_util.validateMarkup(invalidMarkupToShort, 2)
-        assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTag, 1)
-        assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTagType, 1)
-        assert not review_util.validateMarkup(invalidMarkupWithNoClosingTags, 1)
+        assert review_util.validateMarkup(validMarkupWithTags)
+        assert review_util.validateMarkup(validMarkupWithoutTags)
+        assert not review_util.validateMarkup(invalidMarkupIsProfane)
+        assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTag)
+        assert not review_util.validateMarkup(invalidMarkupWithInvalidClosingTagType)
+        assert not review_util.validateMarkup(invalidMarkupWithNoClosingTags)
 
         with pytest.raises(ValueError) as error:  
-            review_util.validateMarkup(None, 1)
+            review_util.validateMarkup(None)
         assert str(error.value) == "Error: please provide a markup string"
 
     def test_removeMarkup(self):

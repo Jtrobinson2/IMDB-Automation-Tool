@@ -37,11 +37,20 @@ def isReviewValid(review : Review):
         ValueError: If review's review body is none, empty, or contains profanity or invalid markup.
         ValueError: If review's not demarked as either a movie or tv show or both.
         ValueError: if reviews review body is < 600 characters
-    """  
+    """ 
+    if(not review.headline):
+        raise ValueError("Error: review must have a headline.")
+    if(not review.reviewBody):
+        raise ValueError("Error: review must have a review body.")
+    if(not review.isMovie and not review.isTVShow):
+        raise ValueError("Error: review must be marked as either a TV show or a Movie.")
+
+    # if(validateMarkup(review.reviewBody, ))
+
     pass 
 
-def validateMarkup(markupString : str, minStringLength : int) -> bool:
-    """Validates that the markup is correct (all opening tags and closing tags are correct, review markup is long enough etc). 
+def validateMarkup(markupString : str) -> bool:
+    """Validates that the markup is correct (all opening tags and closing tags are correct). 
 
     Args:
         markupString (str): markup string 
@@ -54,8 +63,6 @@ def validateMarkup(markupString : str, minStringLength : int) -> bool:
     """  
     if(not markupString):
         raise ValueError("Error: please provide a markup string")
-    if( len(markupString) < minStringLength):
-        return False
     if(profanity.contains_profanity(markupString)):
         return False
     
