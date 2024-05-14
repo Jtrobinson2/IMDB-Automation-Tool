@@ -100,9 +100,3 @@ class TestReviewUtil:
             review_util.isReviewValid(invalidReviewNotShowOrMovie, validTags, 1)
         assert str(error.value) == "Error: review must be marked as either a TV show or a Movie."
                                 
-        
-
-        
-
-
-        
