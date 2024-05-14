@@ -51,32 +51,23 @@ def validateMarkup(markupString : str, minStringLength : int) -> bool:
     if(profanity.contains_profanity(markupString)):
         return False
     
-    #helper method to find the first instance of a substring in a string and the index that substring occurs
-    def findSubstring(string, substring):
-        match = re.search(substring, string)
-        if match:
-            return match.group(), match.start()
-        else:
-            return None
-
     tagsMap = {'[/spoiler]': '[spoiler]', '[/b]': '[b]'}
     
     #recurisive function that validates the string one tag at a time breaking the string down after each opening tag is found
     def validateTags(openTagsStack : list[str], remainingStringToCheck : str) -> bool:        
-        #base case there is no string left check that the stack is empty and return true
+        #base case no open tags without a closer and no string left we're good
         if(not remainingStringToCheck):
-            print(f"Ran out of string tags stack evaluates to {not openTagsStack}")
             return not openTagsStack
         
         #get the next opening tag 
         nextTagsFoundList = []
         for key, value in tagsMap.items():
-            keyTagTuple = findSubstring(remainingStringToCheck, key)
-            valueTagTuple = findSubstring(remainingStringToCheck, value)
-
-            if(keyTagTuple):
+            keyTagTuple = (key, remainingStringToCheck.find(key))
+            valueTagTuple = (value ,remainingStringToCheck.find(value))
+            #only append tags actually found in the string
+            if(keyTagTuple[1] != -1):
                 nextTagsFoundList.append(keyTagTuple)
-            if(valueTagTuple):
+            if(valueTagTuple[1] != -1):
                 nextTagsFoundList.append(valueTagTuple)
 
         #if there's no tags either we processed them all or the string had no tags return true.
@@ -84,21 +75,21 @@ def validateMarkup(markupString : str, minStringLength : int) -> bool:
             return True
         
         #order the list so the first tuple is the one that contains the tag found earliest in the string
-        nextTagsFoundList.sort(key= lambda elem : elem[1])
-        nextTagTuple = nextTagsFoundList[0]
+        nextTagTuple = sorted(nextTagsFoundList, key= lambda elem : elem[1])[0]
 
-        #if the next tag is an opener append it to the stack and pass in the sliced string
+        #if the next tag is an opener append it to the stack and keep processing
         if(nextTagTuple[0] not in tagsMap):
             openTagsStack.append(nextTagTuple[0])
-            validateTags(openTagsStack, remainingStringToCheck[nextTagTuple[1] + len(nextTagTuple[0]):])
+            return validateTags(openTagsStack, remainingStringToCheck[nextTagTuple[1] + len(nextTagTuple[0]):])
         #if the next tag is an closer check the top of the stack for it's opener
         elif(nextTagTuple[0] in tagsMap):
-            #if is there pop the opener from the stack and pass in the sliced string 
+            #the last tag we've seen should be the corresponding opener 
             if(openTagsStack[-1] == tagsMap[nextTagTuple[0]]):
                 openTagsStack.pop()
-                validateTags(openTagsStack, remainingStringToCheck[nextTagTuple[1] + len(nextTagTuple[0]):])
+                return validateTags(openTagsStack, remainingStringToCheck[nextTagTuple[1] + len(nextTagTuple[0]):])
             else:
                 return False
+            
         return True
     
     return validateTags([], markupString)
