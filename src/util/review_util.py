@@ -1,21 +1,30 @@
 """Module that contains helper functions that manipulate validate the elements of a review before submisison"""
 from src.model.review import Review
 from better_profanity import profanity
-import sys
-import re 
 
-def removeReviewMarkup(reviewBody : str) -> str:
+def removeReviewMarkup(reviewBody : str, tagsToRemove : set[str]) -> str:
     """Removes the markup (spoiler tags n such) from a review
 
     Args:
         reviewBody (str): review body of a review 
+        tagsToRemove (set): set of tags that that you want to be removed from the string 
 
     Returns:
         str: cleaned string without markup for review 
 
     Raises:
         ValueError: If reviewBody is empty or none
+        ValueError: If the set of tags to remove is empty
     """  
+
+    if(not reviewBody):
+        raise ValueError("Error: you must submit markup to remove markup.")
+    if(not tagsToRemove):
+        raise ValueError("Error: you must provide at least one type of tag you want to remove")
+    
+
+
+
     pass
 
 def isReviewValid(review : Review):
@@ -71,8 +80,7 @@ def validateMarkup(markupString : str, minStringLength : int) -> bool:
                 nextTagsFoundList.append(valueTagTuple)
 
         #if there's no tags either we processed them all or the string had no tags return true.
-        if(not nextTagsFoundList):
-            return True
+        if(not nextTagsFoundList): return True
         
         #order the list so the first tuple is the one that contains the tag found earliest in the string
         nextTagTuple = sorted(nextTagsFoundList, key= lambda elem : elem[1])[0]
@@ -81,6 +89,7 @@ def validateMarkup(markupString : str, minStringLength : int) -> bool:
         if(nextTagTuple[0] not in tagsMap):
             openTagsStack.append(nextTagTuple[0])
             return validateTags(openTagsStack, remainingStringToCheck[nextTagTuple[1] + len(nextTagTuple[0]):])
+        
         #if the next tag is an closer check the top of the stack for it's opener
         elif(nextTagTuple[0] in tagsMap):
             #the last tag we've seen should be the corresponding opener 

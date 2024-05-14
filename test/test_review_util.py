@@ -26,6 +26,29 @@ class TestReviewUtil:
         with pytest.raises(ValueError) as error:  
             review_util.validateMarkup(None, 1)
         assert str(error.value) == "Error: please provide a markup string"
+
+    def test_removeMarkup(self):
+        validMarkupWithTags = r"""[b]Rating: 10.0[/b] [b]Kyoshi Novels Rating: 9.0[/b] [b]Favourite Episode: Sozin's Comet parts 2-4[/b] Most well-written children's animated show to date. The Series deserves the hype despite it starting out "kiddie" until around episode 3 where [spoiler] The genocide [/spoiler]"""
+        validMarkupWithoutTags = r"This is a valid review without tags"
+        
+        assert review_util.validateMarkup(validMarkupWithTags, 1)
+        assert review_util.validateMarkup(validMarkupWithoutTags, 1)
+
+        with pytest.raises(ValueError) as error:  
+            review_util.removeReviewMarkup("", "[example]")
+        assert str(error.value) == "Error: you must submit markup to remove markup."
+
+        with pytest.raises(ValueError) as error:  
+            review_util.removeReviewMarkup(None, "[example]")
+        assert str(error.value) == "Error: you must submit markup to remove markup."
+
+        with pytest.raises(ValueError) as error:  
+            review_util.removeReviewMarkup("Example", set())
+        assert str(error.value) == "Error: you must provide at least one type of tag you want to remove"
+
+        with pytest.raises(ValueError) as error:  
+            review_util.removeReviewMarkup("Example", None)
+        assert str(error.value) == "Error: you must provide at least one type of tag you want to remove"
         
 
         
