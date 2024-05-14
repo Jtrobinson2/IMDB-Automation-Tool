@@ -28,11 +28,11 @@ class TestReviewUtil:
         assert str(error.value) == "Error: please provide a markup string"
 
     def test_removeMarkup(self):
-        validMarkupWithTags = r"""[b]Rating: 10.0[/b] [b]Kyoshi Novels Rating: 9.0[/b] [b]Favourite Episode: Sozin's Comet parts 2-4[/b] Most well-written children's animated show to date. The Series deserves the hype despite it starting out "kiddie" until around episode 3 where [spoiler] The genocide [/spoiler]"""
-        validMarkupWithoutTags = r"This is a valid review without tags"
+        markupPreRemoval = " [b]Rating: 10.0[/b]\n[b]Kyoshi Novels Rating: 9.0[/b]\n[spoiler]The genocide[/spoiler] "
+        markupPostRemoval = "Rating: 10.0\nKyoshi Novels Rating: 9.0\nThe genocide"
+        tagsToRemove = {"[spoiler]", "[/spoiler]", "[b]", "[/b]"}
         
-        assert review_util.validateMarkup(validMarkupWithTags, 1)
-        assert review_util.validateMarkup(validMarkupWithoutTags, 1)
+        assert review_util.removeReviewMarkup(markupPreRemoval, tagsToRemove=tagsToRemove) == markupPostRemoval
 
         with pytest.raises(ValueError) as error:  
             review_util.removeReviewMarkup("", "[example]")

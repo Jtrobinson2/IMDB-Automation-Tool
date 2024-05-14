@@ -22,10 +22,15 @@ def removeReviewMarkup(reviewBody : str, tagsToRemove : set[str]) -> str:
     if(not tagsToRemove):
         raise ValueError("Error: you must provide at least one type of tag you want to remove")
     
-
-
-
-    pass
+    cleanedString = reviewBody
+    #remove leading and trailing whitespace 
+    cleanedString = cleanedString.strip()
+    #for each tag in the set
+    for tag in tagsToRemove: 
+        #remove that tag from the string
+        cleanedString = cleanedString.replace(tag, "")
+    
+    return cleanedString
 
 def isReviewValid(review : Review):
     """Checks the fields of a review to ensure they are valid for submission
