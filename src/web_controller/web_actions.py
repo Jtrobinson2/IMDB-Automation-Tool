@@ -135,17 +135,13 @@ def removeFromWatchList(driver : webdriver.Chrome, cinemaItemTitle : str) -> boo
     Raises:
         WatchListItemNotFoundError: If cinema item wasn't in the watchlist
         ValueError: If the webdriver is None 
-        ValueError: If user is not logged in
-        Exception: If an incompatible version of the IMDB website was returned on startup
+        Exception: If user is not logged in
           
     """  
     if(not driver):
         raise ValueError("Error: provide a valid driver")
     if(not isLoggedIn(driver)):
-        raise ValueError("Error: nobody is logged in cannot remove from watchlist.")
-
-    #resolves lots of issues with dom elements not being ready when find element is called
-    driver.implicitly_wait(5)
+        raise Exception("Error: nobody is logged in cannot remove from watchlist.")
 
     try:
         WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[4]/a/span/span")))
@@ -164,25 +160,19 @@ def removeFromWatchList(driver : webdriver.Chrome, cinemaItemTitle : str) -> boo
     #two different versions of the imdb website we have to have logic for removing from watchlist
     try:
         #if we get this version of the watchlist page do this algorithmn
-        if(WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='styleguide-v2']")))):
-            print("V2 SITE VERSION SPOTTED")
-        
+        WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='styleguide-v2']")))
         watchListItems = driver.find_elements(By.CLASS_NAME, "lister-item-header")
-        assert(3 == len(watchListItems))
 
         for index, item in enumerate(watchListItems):
             if(cinemaItemTitle in item.text):
-                print(f"found {cinemaItemTitle} on index {index} in v2 site")
                 #css selector for each watch list item ribbon changes based on the cinema item's positon in the watchlist
                 watchListRemoveButton = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, f"#center-1-react > div > div:nth-child(3) > div > div:nth-child({index + 1}) > div > div.lister-item-image > div")))
                 actions.move_to_element_with_offset(watchListRemoveButton, int(random.uniform(1,3)), int(random.uniform(1,3)))
                 actions.click()
-                actions.perform()
-                print("remove from watchlist button clicked in v2 version")                
-                #need to re-find this element because if you don't you'll get a stale element exception even though it's still in the dom??
+                actions.perform()            
                 driver.refresh()
+                #need to re-find this element because if you don't you'll get a stale element exception even though it's still in the dom??
                 watchlistSizeNow = int(driver.find_element(By.XPATH, "//*[@id='imdbHeader']/div[2]/div[4]/a/span/span").get_attribute("innerHTML"))
-                assert(watchListSizePrior - 1 == watchlistSizeNow)
                 return watchListSizePrior - 1 == watchlistSizeNow
              
     except TimeoutException:
@@ -195,13 +185,11 @@ def removeFromWatchList(driver : webdriver.Chrome, cinemaItemTitle : str) -> boo
             watchListItemName = item.find_element(By.CLASS_NAME, "ipc-title-link-wrapper").text
 
             if(cinemaItemTitle in watchListItemName):
-                print(f"found title {cinemaItemTitle} at index {index} in non v2 site")
                 #the xpath of the watch list items change one parameters based on there position in the list that is why index + 1is used to find the xpath of the found item's watchlist button
                 watchListRemoveButton = item.find_element(By.XPATH, f"//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[2]/ul/li[{index + 1}]/div/div/div/div[1]/div[1]/div/div[1]")
                 actions.move_to_element_with_offset(watchListRemoveButton, int(random.uniform(1,3)), int(random.uniform(1,3)))
                 actions.click()
                 actions.perform()
-                print("clicked remove from watchlist on item in non v2 site")
                 #need a small window to allow the dom to update
                 time.sleep(.5)
                 watchlistSizeNow = int(driver.find_element(By.XPATH, "//*[@id='imdbHeader']/div[2]/div[4]/a/span/span").get_attribute("innerHTML"))

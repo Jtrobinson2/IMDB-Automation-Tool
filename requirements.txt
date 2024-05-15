@@ -1,0 +1,3 @@
+better_profanity==0.7.0
+pytest==8.2.0
+selenium==4.20.0
