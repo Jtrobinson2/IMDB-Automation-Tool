@@ -12,5 +12,5 @@ chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 driver = webdriver.Chrome(options=chrome_options)
 
 web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
-web_actions.removeFromWatchList(driver, "2. Frieren: Beyond Journey's End")
+web_actions.removeFromWatchList(driver, "Frieren: Beyond Journey's End")
 
