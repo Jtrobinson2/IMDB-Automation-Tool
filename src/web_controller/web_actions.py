@@ -205,7 +205,6 @@ def removeFromWatchList(driver : webdriver.Chrome, cinemaItemTitle : str) -> boo
                 #need a small window to allow the dom to update
                 time.sleep(.5)
                 watchlistSizeNow = int(driver.find_element(By.XPATH, "//*[@id='imdbHeader']/div[2]/div[4]/a/span/span").get_attribute("innerHTML"))
-                assert(watchListSizePrior - 1 == watchlistSizeNow)
                 return watchListSizePrior - 1 == watchlistSizeNow  
             
         raise watchlist_item_not_found_error() 
