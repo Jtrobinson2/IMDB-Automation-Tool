@@ -89,7 +89,7 @@ def validateMarkup(markupString : str, validTags : dict[str,str]) -> bool:
         nextTagsFoundList = []
         for key, value in validTags.items():
             keyTagTuple = (key, remainingStringToCheck.find(key))
-            valueTagTuple = (value ,remainingStringToCheck.find(value))
+            valueTagTuple = (value, remainingStringToCheck.find(value))
             #only append tags actually found in the string
             if(keyTagTuple[1] != -1):
                 nextTagsFoundList.append(keyTagTuple)

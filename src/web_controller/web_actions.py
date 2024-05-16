@@ -107,7 +107,7 @@ def submitReview(driver : webdriver, review : Review):
     pass
 
 
-def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
+def getCinemaItems(driver : webdriver.Chrome, cinemaItemTitle : str) -> list[str]:
     """Retrieves a list of cinema items from IMDB given the cinema items title
 
     Args:
@@ -118,11 +118,51 @@ def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
         ValueError: If cinemaItemTitle is None or Empty.
         ValueError: If the driver is None 
     """  
-    pass
+
+    if(not driver):
+        raise ValueError("Error: provide a valid driver")
+    if(not cinemaItemTitle):
+        raise ValueError("Error: cinema item title cannot be empty")
+    
+
+    driver.get(endpoints.IMDB_HOME_PAGE)
+
+    actions = ActionChains(driver)
+    
+    #click titles
+    searchTypeDropDown = driver.find_element(By.XPATH, "//*[@id='nav-search-form']/div[1]/div/label")
+    actions.move_to_element_with_offset(searchTypeDropDown, int(random.uniform(1,3)), int(random.uniform(1,3)))
+    actions.click()
+
+    titleSearchTypeDropDownItem = driver.find_element(By.XPATH, "//*[@id='navbar-search-category-select-contents']/ul/li[2]") 
+    actions.move_to_element_with_offset(titleSearchTypeDropDownItem, int(random.uniform(1,3)), int(random.uniform(1,3)))
+    actions.click()
+
+    searchBar = driver.find_element(By.XPATH, "//*[@id='suggestion-search']")
+    sendKeysLikeHuman(cinemaItemTitle, driver, searchBar)
+    searchButton = driver.find_element(By.XPATH, "//*[@id='suggestion-search-button']")
+    actions.move_to_element_with_offset(searchButton, int(random.uniform(1,3)), int(random.uniform(1,3)))
+    actions.click()
+    
+    actions.perform()
+
+    searchResultsListContainer = driver.find_element(By.XPATH, "//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul")
+    searchResultListItems =  searchResultsListContainer.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul")
+
+    cinemaItemsList = []
+    for index, element in enumerate(searchResultListItems):
+        
+        cinemaItemsList.append(element.find_element(By.XPATH, f"//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul/li[{index +1}]/div[2]/div/a").text)
+
+    for item in cinemaItemsList:
+        print(item)
+    #TODO: figure out why this is only printing frieren and not everything else
+        return cinemaItemsList
 
 
 
-def removeFromWatchList(driver : webdriver.Chrome, cinemaItemTitle : str) -> bool :
+
+def removeFromWatchList(driver : webdriver, cinemaItemTitle : str) -> bool :
     """Removes a cinema item from the users watchlist
 
     Args:
@@ -180,7 +220,6 @@ def removeFromWatchList(driver : webdriver.Chrome, cinemaItemTitle : str) -> boo
         watchListItems = watchlistContainer.find_elements(By.TAG_NAME, "li")
     
         for index, item in enumerate(watchListItems):
-            #TODO replace all substring finds with in keyword instead 
             #TODO test this
             watchListItemName = item.find_element(By.CLASS_NAME, "ipc-title-link-wrapper").text
 
