@@ -107,7 +107,7 @@ def submitReview(driver : webdriver, review : Review):
     pass
 
 
-def getCinemaItems(driver : webdriver.Chrome, cinemaItemTitle : str) -> list[str]:
+def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
     """Retrieves a list of cinema items from IMDB given the cinema items title
 
     Args:
