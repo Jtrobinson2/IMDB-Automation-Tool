@@ -1,10 +1,10 @@
 """Module that contains all of the web actions from logging in to submitting a review that automation tool will need.
 """
-from model.review import Review
-from model import watchlist_item_not_found_error
-from util import endpoints
+from src.model.review import Review
+from src.model import watchlist_item_not_found_error
+from src.util import endpoints
 from selenium import webdriver
-from model.login_error import LoginError
+from src.model.login_error import LoginError
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -59,7 +59,7 @@ def login(driver : webdriver, accountUsername : str, password : str, username : 
         try:
             #this element only appears if imdb thinks your a bot
             driver.find_element(By.CLASS_NAME, "a-size-large")
-            raise LoginError(f"Error logging in you must login manually")
+            raise LoginError("Error logging in you must login manually")
         except NoSuchElementException:
             #make sure we're logged into the correct user
             loggedInUserElement = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[5]/div/label[2]/span/span")))
