@@ -129,7 +129,6 @@ def getCinemaItems(driver : webdriver.Chrome, cinemaItemTitle : str) -> list[str
 
     actions = ActionChains(driver)
     
-    #click titles
     searchTypeDropDown = driver.find_element(By.XPATH, "//*[@id='nav-search-form']/div[1]/div/label")
     actions.move_to_element_with_offset(searchTypeDropDown, int(random.uniform(1,3)), int(random.uniform(1,3)))
     actions.click()
@@ -146,20 +145,14 @@ def getCinemaItems(driver : webdriver.Chrome, cinemaItemTitle : str) -> list[str
     
     actions.perform()
 
-    searchResultsListContainer = driver.find_element(By.XPATH, "//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul")
-    searchResultListItems =  searchResultsListContainer.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul")
+    searchResultListItems =  len(driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul/li[contains(@class, 'ipc-metadata-list-summary-item ipc-metadata-list-summary-item--click find-result-item find-title-result')]/div[2]/div/a"))
 
     cinemaItemsList = []
-    for index, element in enumerate(searchResultListItems):
+
+    for index in range(searchResultListItems):
+        cinemaItemsList.append(driver.find_element(By.XPATH, f"//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul/li[{index + 1}]/div[2]/div/a").text)
         
-        cinemaItemsList.append(element.find_element(By.XPATH, f"//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul/li[{index +1}]/div[2]/div/a").text)
-
-    for item in cinemaItemsList:
-        print(item)
-    #TODO: figure out why this is only printing frieren and not everything else
-        return cinemaItemsList
-
-
+    return cinemaItemsList
 
 
 def removeFromWatchList(driver : webdriver, cinemaItemTitle : str) -> bool :
@@ -269,9 +262,3 @@ def sendKeysLikeHuman(keys : str, driver : webdriver, inputElement : WebElement)
         actions.send_keys(character)
         actions.perform()
         time.sleep(random.uniform(0.1,0.2))
-
-    
-
-
-
-
