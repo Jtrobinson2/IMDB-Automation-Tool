@@ -106,7 +106,7 @@ def submitReview(driver : webdriver, review : Review):
     """
     pass
 
-
+#TODO: test this
 def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
     """Retrieves a list of cinema items from IMDB given the cinema items title
 
@@ -146,15 +146,9 @@ def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
     actions.perform()
 
     searchResultListItems = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul/li[contains(@class, 'ipc-metadata-list-summary-item ipc-metadata-list-summary-item--click find-result-item find-title-result')]/div[2]/div/a")
+    return  [item.text for item in searchResultListItems]
 
-    cinemaItemsList = []
-
-    for item in searchResultListItems:
-        cinemaItemsList.append(item.text)
-
-    return cinemaItemsList
-
-
+#TODO test this
 def removeFromWatchList(driver : webdriver, cinemaItemTitle : str) -> bool :
     """Removes a cinema item from the users watchlist
 
@@ -213,7 +207,7 @@ def removeFromWatchList(driver : webdriver, cinemaItemTitle : str) -> bool :
         watchListItems = watchlistContainer.find_elements(By.TAG_NAME, "li")
     
         for index, item in enumerate(watchListItems):
-            #TODO test this
+
             watchListItemName = item.find_element(By.CLASS_NAME, "ipc-title-link-wrapper").text
 
             if(cinemaItemTitle in watchListItemName):
