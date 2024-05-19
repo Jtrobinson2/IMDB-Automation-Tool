@@ -1,3 +1,9 @@
+import os
+import sys
+
+script_dir = os.path.dirname( __file__ )
+sys.path.append( script_dir )
+
 from web_controller import web_actions
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -12,5 +18,5 @@ chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 driver = webdriver.Chrome(options=chrome_options)
 
 
-web_actions.getCinemaItems(driver, "Frieren")
-
+fList = web_actions.getCinemaItems(driver, "Frieren")
+print("lmao")

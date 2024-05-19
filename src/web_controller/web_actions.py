@@ -1,10 +1,10 @@
 """Module that contains all of the web actions from logging in to submitting a review that automation tool will need.
 """
-from src.model.review import Review
-from src.model import watchlist_item_not_found_error
-from src.util import endpoints
+from model.review import Review
+from model import watchlist_item_not_found_error
+from util import endpoints
 from selenium import webdriver
-from src.model.login_error import LoginError
+from model.login_error import LoginError
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
