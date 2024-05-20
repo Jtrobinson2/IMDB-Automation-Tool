@@ -106,7 +106,6 @@ def submitReview(driver : webdriver, review : Review):
     """
     pass
 
-#TODO: test this
 def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
     """Retrieves a list of cinema items from IMDB given the cinema items title
 

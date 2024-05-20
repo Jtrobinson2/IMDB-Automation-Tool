@@ -35,9 +35,21 @@ class TestWebActionsNoLogin:
      to include logic for loggin in a prerequisite for most tests to pass """
     
     def testGetCinemaItems(self, driver):
+        with pytest.raises(ValueError) as error:  
+            web_actions.getCinemaItems(None, "Example")
+        assert str(error.value) == "Error: provide a valid driver"
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.getCinemaItems(driver, "")
+        assert str(error.value) == "Error: cinema item title cannot be empty"
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.getCinemaItems(driver, None)
+        assert str(error.value) == "Error: cinema item title cannot be empty"
+
         # only checks the first five elements because the rest are liable to change often
         firstFiveFrierenResults = ["Frieren: Beyond Journey's End", 'Frieren', 'Soso no Frieren: Mini Anime', 
-                       'The Suitor', 'Kleine frieren auch im Sommer', ]
+                       'The Suitor', 'Kleine frieren auch im Sommer']
         
         actualList = web_actions.getCinemaItems(driver, "Frieren")
         

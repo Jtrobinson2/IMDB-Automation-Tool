@@ -2,8 +2,6 @@ import pytest
 from src.model.review import Review
 from src.util import review_util
 
-
-# TODO figure out how to get pytest to recognize tests despite application being able to run on the main method
 class TestReviewUtil:
 
     def test_validate_markup(self):
