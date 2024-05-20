@@ -1,5 +1,5 @@
 """Module that contains helper functions that manipulate validate the elements of a review before submisison"""
-from model.review import Review
+from src.model.review import Review
 from better_profanity import profanity
 
 def removeReviewMarkup(reviewBody : str, tagsToRemove : set[str]) -> str:

@@ -1,10 +1,12 @@
-import os
-import sys
+from pathlib import Path
+import sys 
+# Get the directory where the script is located
+script_path = Path(__file__).resolve()
+# Get the parent directory
+parent_dir = script_path.parent.parent
+sys.path.append( str(parent_dir) )
 
-script_dir = os.path.dirname( __file__ )
-sys.path.append( script_dir )
-
-from web_controller import web_actions
+from src.web_controller import web_actions
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By

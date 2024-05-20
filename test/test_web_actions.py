@@ -35,15 +35,14 @@ class TestWebActionsNoLogin:
      to include logic for loggin in a prerequisite for most tests to pass """
     
     def testGetCinemaItems(self, driver):
-        frierenList = ["Frieren: Beyond Journey's End", 'Frieren', 'Soso no Frieren: Mini Anime', 
-                       'Kleine frieren auch im Sommer', 'The Suitor', "Let's Get Married", 
-                       'Labyrinth of Peace', 'Frères', 'Pros and Cons', 'Band of Brothers', 'Kylmä', 
-                       'One Tree Hill', 'Brothers', 'White Chicks', 'Frieren', 'Daisy Jones & The Six', 
-                       'Step Brothers', 'War & Peace', 'Friere', 'Guilt', 'Black-ish', 
-                       'Rest in Peace', 'Book Club', 'The Brothers Sun', 'The Brigade'
-                       ]
+        # only checks the first five elements because the rest are liable to change often
+        firstFiveFrierenResults = ["Frieren: Beyond Journey's End", 'Frieren', 'Soso no Frieren: Mini Anime', 
+                       'The Suitor', 'Kleine frieren auch im Sommer', ]
         
-        assert web_actions.getCinemaItems(driver, "Frieren") == frierenList
+        actualList = web_actions.getCinemaItems(driver, "Frieren")
+        
+        assert len(actualList) > len(firstFiveFrierenResults)
+        assert  actualList[:5] == firstFiveFrierenResults[:5]
 
     def testLogin(self, driver):
         #invalid login
