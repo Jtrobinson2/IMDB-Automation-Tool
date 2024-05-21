@@ -1,7 +1,7 @@
 """Module that contains all of the web actions from logging in to submitting a review that automation tool will need.
 """
 from src.model.review import Review
-from src.model import watchlist_item_not_found_error
+from src.model.watchlist_item_not_found_error import WatchListItemNotFoundError
 from src.util import endpoints
 from selenium import webdriver
 from src.model.login_error import LoginError
@@ -220,7 +220,7 @@ def removeFromWatchList(driver : webdriver, cinemaItemTitle : str) -> bool :
                 watchlistSizeNow = int(driver.find_element(By.XPATH, "//*[@id='imdbHeader']/div[2]/div[4]/a/span/span").get_attribute("innerHTML"))
                 return watchListSizePrior - 1 == watchlistSizeNow  
             
-        raise watchlist_item_not_found_error() 
+        raise WatchListItemNotFoundError() 
 
 
 def sendKeysLikeHuman(keys : str, driver : webdriver, inputElement : WebElement):
