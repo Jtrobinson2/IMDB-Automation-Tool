@@ -57,14 +57,44 @@ class TestWebActionsNoLogin:
         assert  actualList[:5] == firstFiveFrierenResults[:5]
 
     def testLogin(self, driver):
+        #invalid parameters
+        with pytest.raises(ValueError) as error:  
+            web_actions.login(None, "invalidUser@gmail.com", "wrongPass", "WrongAccountName")
+        assert str(error.value).__contains__("Error: Please Provide a valid driver") 
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.login(driver, "accountName", "wrongPass", "")
+        assert str(error.value).__contains__("Error: username cannot be null or empty") 
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.login(driver, "accountName", "wrongPass", None)
+        assert str(error.value).__contains__("Error: username cannot be null or empty") 
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.login(driver, "", "wrongPass", "username")
+        assert str(error.value).__contains__("Error: account username cannot be null or empty") 
+
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.login(driver, None, "wrongPass", "username")
+        assert str(error.value).__contains__("Error: account username cannot be null or empty") 
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.login(driver, "accountName", "", "username")
+        assert str(error.value).__contains__("Error: password cannot be null or empty") 
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.login(driver, "accountName", None, "username")
+        assert str(error.value).__contains__("Error: password cannot be null or empty") 
+
         #invalid login
         with pytest.raises(LoginError) as error:  
-            web_actions.login(driver, "invalidUser@gmail.com", "wrongPass", "WrongAccountName")
+            web_actions.login(driver, "accountName", "wrongPass", "username")
         assert str(error.value).__contains__("Error logging in") 
         
         #valid login
         web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
-        loggedInUserElement = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[5]/div/label[2]/span/span")))
+        loggedInUserElement = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[5]/div/label[2]/span/span")))
         assert loggedInUserElement.text == "TestAccount"
 
     
