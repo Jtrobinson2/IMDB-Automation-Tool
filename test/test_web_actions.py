@@ -7,8 +7,33 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-#setup driver once for the entire module tear down when tests are done.
-@pytest.fixture(scope="module")
+#driver to be used for all web actions that don't require loggin in. Destroyed when those tests are done.
+@pytest.fixture(scope="class")
+def loggedInDriver():
+    chrome_options = Options()
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_experimental_option("detach", True)
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    driver = webdriver.Chrome(options=chrome_options)
+    web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
+    yield driver
+    driver.quit()
+
+class TestWebActionsLoginRequired: 
+    """Tests web actions that require the user to be logged in"""
+        
+    def testSubmitReview(self, loggedInDriver):
+        assert web_actions.isLoggedIn(loggedInDriver)
+        pass
+
+    def testRemoveFromWatchlist(self, loggedInDriver):
+        assert web_actions.isLoggedIn(loggedInDriver)
+        pass
+
+
+
+#driver to be used for all web actions that don't require loggin in. Destroyed when those tests are done.
+@pytest.fixture(scope="class")
 def driver():
     chrome_options = Options()
     chrome_options.add_experimental_option("useAutomationExtension", False)
@@ -17,22 +42,6 @@ def driver():
     driver = webdriver.Chrome(options=chrome_options)
     yield driver
     driver.quit()
-
-class TestWebActionsLoginRequired: 
-    """Tests web actions that require the user to be logged in"""
-
-    # @pytest.fixture(scope="class")s
-    # def login(driver):
-    #     web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
-        
-    # def testSubmitReview(self, driver):
-    #     assert web_actions.isLoggedIn(driver)
-    #     pass
-
-    # def testRemoveFromWatchlist(self, driver):
-    #     assert web_actions.isLoggedIn(driver)
-    #     pass
-
 
 class TestWebActionsNoLogin:
     """Tests web actions that don't require the user to be logged in, this allows setup code in class above 
