@@ -18,16 +18,20 @@ def driver():
     yield driver
     driver.quit()
 
-class TestWebActionsLoginRequired:    
-    def testIsLoggedIn(self, driver):
-        pass 
-    
-    def testSubmitReview(self, driver):
-        pass
+class TestWebActionsLoginRequired: 
+    """Tests web actions that require the user to be logged in"""
 
+    # @pytest.fixture(scope="class")s
+    # def login(driver):
+    #     web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
+        
+    # def testSubmitReview(self, driver):
+    #     assert web_actions.isLoggedIn(driver)
+    #     pass
 
-    def testRemoveFromWatchlist(self, driver):
-        pass
+    # def testRemoveFromWatchlist(self, driver):
+    #     assert web_actions.isLoggedIn(driver)
+    #     pass
 
 
 class TestWebActionsNoLogin:
@@ -51,12 +55,12 @@ class TestWebActionsNoLogin:
         firstFiveFrierenResults = ["Frieren: Beyond Journey's End", 'Frieren', 'Soso no Frieren: Mini Anime', 
                        'The Suitor', 'Kleine frieren auch im Sommer']
         
-        actualList = web_actions.getCinemaItems(driver, "Frieren")
-        
+        actualList = web_actions.getCinemaItems(driver, "Frieren")     
         assert len(actualList) > len(firstFiveFrierenResults)
         assert  actualList[:5] == firstFiveFrierenResults[:5]
 
-    def testLogin(self, driver):
+
+    def testLoginAndIsLoggedIn(self, driver):
         #invalid parameters
         with pytest.raises(ValueError) as error:  
             web_actions.login(None, "invalidUser@gmail.com", "wrongPass", "WrongAccountName")
@@ -74,7 +78,6 @@ class TestWebActionsNoLogin:
             web_actions.login(driver, "", "wrongPass", "username")
         assert str(error.value).__contains__("Error: account username cannot be null or empty") 
 
-
         with pytest.raises(ValueError) as error:  
             web_actions.login(driver, None, "wrongPass", "username")
         assert str(error.value).__contains__("Error: account username cannot be null or empty") 
@@ -91,11 +94,24 @@ class TestWebActionsNoLogin:
         with pytest.raises(LoginError) as error:  
             web_actions.login(driver, "accountName", "wrongPass", "username")
         assert str(error.value).__contains__("Error logging in") 
-        
+
+        #invalid is logged in arguements
+        with pytest.raises(ValueError) as error:  
+            web_actions.isLoggedIn(None)
+        assert str(error.value).__contains__("Error: Please Provide a valid driver") 
+    
         #valid login
         web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
         loggedInUserElement = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[5]/div/label[2]/span/span")))
         assert loggedInUserElement.text == "TestAccount"
+        assert web_actions.isLoggedIn(driver)
+
+
+
+
+        
+
+
 
     
 
