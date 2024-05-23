@@ -1,6 +1,8 @@
 """Module that contains all of the web actions from logging in to submitting a review that automation tool will need.
 """
 from src.model.review import Review
+import src.util.review_util as util
+from src.model.duplicate_list_item_exception import DuplicateListItemException
 from src.model.watchlist_item_not_found_error import WatchListItemNotFoundError
 from src.util import endpoints
 from selenium import webdriver
@@ -12,6 +14,8 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+import re
 import time
 import random
 
@@ -91,7 +95,7 @@ def isLoggedIn(driver : webdriver) -> bool:
     
 
 
-#implement this
+#TODO implement this
 def submitReview(driver : webdriver, review : Review):
     """Submits a review to a user's IMDB lists and the reviewed item's page
 
@@ -105,6 +109,96 @@ def submitReview(driver : webdriver, review : Review):
         ValueError: If the driver is None   
     """
     pass
+
+#TODO implement this
+def addReviewToWatchList(driver : webdriver.Chrome, itemToReview : str,  watchlistURL : str, reviewBody : str, validTags : dict[str,str]=None):
+    """Submits a review to a specified watchlist 
+
+    Args:
+        driver (webdriver): web driver to execute actions
+        watchlistURL (str): the url of the list the review needs to be added to
+        itemToReview (str): title of cinema item to review NOTE: you need to append the year of item to review to the string "Attack On Titan (2013)" 
+        reviewBody (str): the review itself with our without markup
+        validTags (dict[str,str]): markup tags that will be used in the review if needed ({closing tag : opening tag})
+
+    Raises:
+        ValueError: if itemToReview is empty or None
+        ValueError: if watchlistURL is empty or None
+        ValueError: if reviewBody is empty or None
+        ValueError: if reviewBody markup is invalid
+        LoginError: if user is not logged in
+        DuplicateListItemException: if users attempts to add a review to a list that already has that review
+    """
+    if(not driver):
+        raise ValueError("Error: provide a valid driver.")
+    if(not itemToReview):
+        raise ValueError("Error: item to review not provided.")
+    if(not watchlistURL):
+        raise ValueError("Error: watchlist URL cannot be empty or none.")
+    if(not reviewBody):
+        raise ValueError("Error: review body cannot be empty or none.")
+    if(not isLoggedIn(driver)):
+        raise LoginError("Error: user must be logged in to submit review to watchlist.")
+    if(not validTags):
+        validTags = {"[/spoiler]" : "[spoiler]", "[/b]" : "[b]"}
+    if(not util.validateMarkup(reviewBody, validTags)):
+        raise ValueError("Error: invalid review markup")
+    
+    #go to the watchlist url
+    driver.get(watchlistURL)
+
+    #check the list to see if the item has already been added to the list 
+
+
+    #regex is for removing the 1., 2. on the cinema item titles before putting them in the set
+    listItemTitlesSet = set()
+    [listItemTitlesSet.add(re.sub(r'^\d+\.\s*', '', elem.text)) for elem in driver.find_elements(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[2]/ul/li/div/div/div/div[1]/div[2]/div[1]/a/h3")]
+    if(itemToReview[:-7] in listItemTitlesSet):
+        raise DuplicateListItemException()
+
+    #Hit edit button 
+    editButton = driver.find_element(By.XPATH, "//*[@id='__next']/main/div/section/section/div[3]/section/div[1]/div/div[2]/a").click()
+
+    #select the search bar and put the cinema item to review into search bar
+    searchBar = driver.find_element(By.XPATH, "//*[starts-with(@id, 'text-input')]")
+    sendKeysLikeHuman(itemToReview, driver, searchBar)
+    driver.find_element(By.XPATH, "//*[starts-with(@id, 'text-input')]").click()
+
+    #find the cinema item from the dropdown and click it
+    # searchResults = 
+
+    for result in driver.find_elements(By.XPATH, "//*[starts-with(@id, 'react-autowhatever-1--item-')]") :
+        if(result.text == itemToReview):
+            result.click()
+            break
+        
+ 
+
+    #wait until the new item has been actually added to the list (this is a snackbar that shows indicated success)
+    WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, "/html/body/section")))
+    listItemsAfterAddition = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div/ul/div/li/div[2]/div/div/div[1]/a/h3")
+    print(f"item we're looking for {itemToReview[:-7]}")
+
+    #find the cinema item in the new dropdown list
+    for index, item in enumerate(listItemsAfterAddition):
+        #slicing off the year from the itemToReview string (test (2011) -> test )
+        print(f"item named {item.text} compared to {itemToReview[:-7]} should equal {itemToReview[:-7] in item.text}")
+        if(itemToReview[:-7] in item.text):
+            print(f"found list item {itemToReview[:-7]}")
+            #click into the cinema item's add note field
+            addNoteButton = item.find_element(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[4]/ul/div/li/div[2]/div/div/div[4]").click()
+            #paste the review markup 
+            reviewInputArea = item.find_element(By.XPATH, f"//*[starts-with(@id, 'textarea__{index + 1}')]")
+            sendKeysLikeHuman(reviewBody, driver, reviewInputArea)
+            reviewInputArea.send_keys(Keys.ENTER)
+            break
+            
+    # check if  list item descrtiption successfully updated element is present if so it worked.
+    try:
+        driver.find_element(By.XPATH, "/html/body/section")
+        return True
+    except NoSuchElementException:
+        return False
 
 def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
     """Retrieves a list of cinema items from IMDB given the cinema items title
@@ -147,7 +241,7 @@ def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
     searchResultListItems = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul/li[contains(@class, 'ipc-metadata-list-summary-item ipc-metadata-list-summary-item--click find-result-item find-title-result')]/div[2]/div/a")
     return  [item.text for item in searchResultListItems]
 
-#TODO test this
+
 def removeFromWatchList(driver : webdriver, cinemaItemTitle : str) -> bool :
     """Removes a cinema item from the users watchlist
 
@@ -206,9 +300,7 @@ def removeFromWatchList(driver : webdriver, cinemaItemTitle : str) -> bool :
         watchListItems = watchlistContainer.find_elements(By.TAG_NAME, "li")
     
         for index, item in enumerate(watchListItems):
-
             watchListItemName = item.find_element(By.CLASS_NAME, "ipc-title-link-wrapper").text
-
             if(cinemaItemTitle in watchListItemName):
                 #the xpath of the watch list items change one parameters based on there position in the list that is why index + 1is used to find the xpath of the found item's watchlist button
                 watchListRemoveButton = item.find_element(By.XPATH, f"//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[2]/ul/li[{index + 1}]/div/div/div/div[1]/div[1]/div/div[1]")
