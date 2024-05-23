@@ -143,14 +143,10 @@ def addReviewToWatchList(driver : webdriver.Chrome, itemToReview : str,  watchli
         validTags = {"[/spoiler]" : "[spoiler]", "[/b]" : "[b]"}
     if(not util.validateMarkup(reviewBody, validTags)):
         raise ValueError("Error: invalid review markup")
-    
-    #go to the watchlist url
+
     driver.get(watchlistURL)
 
-    #check the list to see if the item has already been added to the list 
-
-
-    #regex is for removing the 1., 2. on the cinema item titles before putting them in the set
+    #regex is for removing the 1., 2., on the cinema item titles before putting them in the set (1. example --> example)
     listItemTitlesSet = set()
     [listItemTitlesSet.add(re.sub(r'^\d+\.\s*', '', elem.text)) for elem in driver.find_elements(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[2]/ul/li/div/div/div/div[1]/div[2]/div[1]/a/h3")]
     if(itemToReview[:-7] in listItemTitlesSet):
@@ -165,15 +161,11 @@ def addReviewToWatchList(driver : webdriver.Chrome, itemToReview : str,  watchli
     driver.find_element(By.XPATH, "//*[starts-with(@id, 'text-input')]").click()
 
     #find the cinema item from the dropdown and click it
-    # searchResults = 
-
     for result in driver.find_elements(By.XPATH, "//*[starts-with(@id, 'react-autowhatever-1--item-')]") :
         if(result.text == itemToReview):
             result.click()
             break
         
- 
-
     #wait until the new item has been actually added to the list (this is a snackbar that shows indicated success)
     WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, "/html/body/section")))
     listItemsAfterAddition = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div/ul/div/li/div[2]/div/div/div[1]/a/h3")
@@ -185,10 +177,15 @@ def addReviewToWatchList(driver : webdriver.Chrome, itemToReview : str,  watchli
         print(f"item named {item.text} compared to {itemToReview[:-7]} should equal {itemToReview[:-7] in item.text}")
         if(itemToReview[:-7] in item.text):
             print(f"found list item {itemToReview[:-7]}")
-            #click into the cinema item's add note field
-            addNoteButton = item.find_element(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[4]/ul/div/li/div[2]/div/div/div[4]").click()
+            #click into the cinema item's description field
+            inputFieldButton = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.XPATH, f"//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[4]/ul/div[{index + 1}]/li/div[2]/div/div/div[4]")))
+            # TODO fix this no such element exception after adding actions chain on 188
+            actions = ActionChains(driver)
+            actions.move_to_element(inputFieldButton)
+            actions.click(inputFieldButton)
+            actions.perform()
             #paste the review markup 
-            reviewInputArea = item.find_element(By.XPATH, f"//*[starts-with(@id, 'textarea__{index + 1}')]")
+            reviewInputArea = driver.find_element(By.XPATH, f"//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[4]/ul/div[{index + 1}]/li/div[2]/div/div/div[4]/div/div/div").find_element(By.CLASS_NAME, "ipc-textarea__input")
             sendKeysLikeHuman(reviewBody, driver, reviewInputArea)
             reviewInputArea.send_keys(Keys.ENTER)
             break
