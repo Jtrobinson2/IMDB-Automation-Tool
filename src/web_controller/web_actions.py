@@ -110,20 +110,20 @@ def submitReview(driver : webdriver, review : Review):
     """
     pass
 
-#TODO implement this
-def addReviewToWatchList(driver : webdriver.Chrome, itemToReview : str,  watchlistURL : str, reviewBody : str, validTags : dict[str,str]=None):
-    """Submits a review to a specified watchlist 
+
+def addReviewToUserList(driver : webdriver.Chrome, itemToReview : str,  userCinemaListURL : str, reviewBody : str, validTags : dict[str,str]=None):
+    """Submits a review to a specified user created list on imdb 
 
     Args:
         driver (webdriver): web driver to execute actions
-        watchlistURL (str): the url of the list the review needs to be added to
+        userCinemaListURL (str): the url of the list the review needs to be added to
         itemToReview (str): title of cinema item to review NOTE: you need to append the year of item to review to the string "Attack On Titan (2013)" 
         reviewBody (str): the review itself with our without markup
         validTags (dict[str,str]): markup tags that will be used in the review if needed ({closing tag : opening tag})
 
     Raises:
         ValueError: if itemToReview is empty or None
-        ValueError: if watchlistURL is empty or None
+        ValueError: if userCinemaListURL is empty or None
         ValueError: if reviewBody is empty or None
         ValueError: if reviewBody markup is invalid
         LoginError: if user is not logged in
@@ -133,7 +133,7 @@ def addReviewToWatchList(driver : webdriver.Chrome, itemToReview : str,  watchli
         raise ValueError("Error: provide a valid driver.")
     if(not itemToReview):
         raise ValueError("Error: item to review not provided.")
-    if(not watchlistURL):
+    if(not userCinemaListURL):
         raise ValueError("Error: watchlist URL cannot be empty or none.")
     if(not reviewBody):
         raise ValueError("Error: review body cannot be empty or none.")
@@ -144,7 +144,7 @@ def addReviewToWatchList(driver : webdriver.Chrome, itemToReview : str,  watchli
     if(not util.validateMarkup(reviewBody, validTags)):
         raise ValueError("Error: invalid review markup")
 
-    driver.get(watchlistURL)
+    driver.get(userCinemaListURL)
 
     #regex is for removing the 1., 2., on the cinema item titles before putting them in the set (1. example --> example)
     listItemTitlesSet = set()
@@ -153,7 +153,7 @@ def addReviewToWatchList(driver : webdriver.Chrome, itemToReview : str,  watchli
         raise DuplicateListItemException()
 
     #Hit edit button 
-    editButton = driver.find_element(By.XPATH, "//*[@id='__next']/main/div/section/section/div[3]/section/div[1]/div/div[2]/a").click()
+    driver.find_element(By.XPATH, "//*[@id='__next']/main/div/section/section/div[3]/section/div[1]/div/div[2]/a").click()
 
     #select the search bar and put the cinema item to review into search bar
     searchBar = driver.find_element(By.XPATH, "//*[starts-with(@id, 'text-input')]")
@@ -161,7 +161,7 @@ def addReviewToWatchList(driver : webdriver.Chrome, itemToReview : str,  watchli
     driver.find_element(By.XPATH, "//*[starts-with(@id, 'text-input')]").click()
 
     #find the cinema item from the dropdown and click it
-    for result in driver.find_elements(By.XPATH, "//*[starts-with(@id, 'react-autowhatever-1--item-')]") :
+    for result in driver.find_elements(By.XPATH, "//*[starts-with(@id, 'react-autowhatever-1--item-')]"):
         if(result.text == itemToReview):
             result.click()
             break
@@ -169,25 +169,17 @@ def addReviewToWatchList(driver : webdriver.Chrome, itemToReview : str,  watchli
     #wait until the new item has been actually added to the list (this is a snackbar that shows indicated success)
     WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, "/html/body/section")))
     listItemsAfterAddition = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div/ul/div/li/div[2]/div/div/div[1]/a/h3")
-    print(f"item we're looking for {itemToReview[:-7]}")
 
     #find the cinema item in the new dropdown list
     for index, item in enumerate(listItemsAfterAddition):
         #slicing off the year from the itemToReview string (test (2011) -> test )
-        print(f"item named {item.text} compared to {itemToReview[:-7]} should equal {itemToReview[:-7] in item.text}")
         if(itemToReview[:-7] in item.text):
-            print(f"found list item {itemToReview[:-7]}")
             #click into the cinema item's description field
             inputFieldButton = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.XPATH, f"//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[4]/ul/div[{index + 1}]/li/div[2]/div/div/div[4]")))
-            # TODO fix this no such element exception after adding actions chain on 188
-            actions = ActionChains(driver)
-            actions.move_to_element(inputFieldButton)
-            actions.click(inputFieldButton)
-            actions.perform()
+            driver.execute_script("arguments[0].click();", inputFieldButton)
             #paste the review markup 
-            reviewInputArea = driver.find_element(By.XPATH, f"//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[4]/ul/div[{index + 1}]/li/div[2]/div/div/div[4]/div/div/div").find_element(By.CLASS_NAME, "ipc-textarea__input")
-            sendKeysLikeHuman(reviewBody, driver, reviewInputArea)
-            reviewInputArea.send_keys(Keys.ENTER)
+            reviewInputArea = driver.find_element(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[4]/ul/div/li/div[2]/div/div/div[4]/div/div/div").find_element(By.TAG_NAME, "textarea")
+            reviewInputArea.send_keys(reviewBody + Keys.ENTER)
             break
             
     # check if  list item descrtiption successfully updated element is present if so it worked.
@@ -344,3 +336,4 @@ def sendKeysLikeHuman(keys : str, driver : webdriver, inputElement : WebElement)
         actions.send_keys(character)
         actions.perform()
         time.sleep(random.uniform(0.1,0.2))
+
