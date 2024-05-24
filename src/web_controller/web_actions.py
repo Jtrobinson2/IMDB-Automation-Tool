@@ -321,11 +321,10 @@ def removeFromWatchList(driver : webdriver, cinemaItemTitle : str) -> bool :
         raise Exception("Error: nobody is logged in cannot remove from watchlist.")
 
     try:
-        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[4]/a/span/span")))
+       watchListSizeText = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[4]/a/span/span"))).get_attribute("innerHTML")
     except Exception:
         raise TimeoutError("Error: the web element that contains the watchlist didn't load for some reason")
 
-    watchListSizeText = driver.find_element(By.XPATH, "//*[@id='imdbHeader']/div[2]/div[4]/a/span/span").get_attribute("innerHTML")
     watchListSizePrior = int(watchListSizeText)
     watchlistSizeNow = watchListSizePrior
     watchListHyperLink = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='imdbHeader']/div[2]/div[4]/a"))).get_attribute("href")
