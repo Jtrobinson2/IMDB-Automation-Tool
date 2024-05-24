@@ -96,7 +96,9 @@ def isLoggedIn(driver : webdriver) -> bool:
 
 
 #TODO implement this
-def submitReview(driver : webdriver, review : Review):
+#TODO test this
+#TODO change driver from chrome
+def submitReview(driver : webdriver.Chrome, review : Review) -> bool:
     """Submits a review to a user's IMDB lists and the reviewed item's page
 
     Args:
@@ -104,13 +106,79 @@ def submitReview(driver : webdriver, review : Review):
         driver (webdriver): the web driver to perform the actions
 
     Raises:
-        ValueError: If user name is None or Empty.
-        ValueError: If password is None or Empty.
-        ValueError: If the driver is None   
+        ValueError: If driver is None.
+        ValueError: If review  is None.
+        LoginError: if the user isn't logged in
+        ValueError: If review is invalid for whatever reason   
     """
-    pass
+    if(not driver):
+        raise ValueError("Error: provide a valid driver.")
+    if(not isLoggedIn(driver)):
+        raise LoginError("Error: user must be logged in submit review.")
+    #TODO: maybe refactor is review valid to just through value errors instead
+    inspectionResults = util.isReviewValid(review, {"[spoiler]", "[/spoiler]", "[b]", "[/b]"})
+    if(not inspectionResults[0]):
+        raise ValueError(inspectionResults[1])
+    
+    driver.get(endpoints.IMDB_HOME_PAGE)
 
+    actions = ActionChains(driver)
+    
+    searchTypeDropDown = driver.find_element(By.XPATH, "//*[@id='nav-search-form']/div[1]/div/label")
+    actions.move_to_element_with_offset(searchTypeDropDown, int(random.uniform(1,3)), int(random.uniform(1,3)))
+    actions.click()
 
+    titleSearchTypeDropDownItem = driver.find_element(By.XPATH, "//*[@id='navbar-search-category-select-contents']/ul/li[2]") 
+    actions.move_to_element_with_offset(titleSearchTypeDropDownItem, int(random.uniform(1,3)), int(random.uniform(1,3)))
+    actions.click()
+
+    searchBar = driver.find_element(By.XPATH, "//*[@id='suggestion-search']")
+    sendKeysLikeHuman(review.itemTitle, driver, searchBar)
+    searchButton = driver.find_element(By.XPATH, "//*[@id='suggestion-search-button']")
+    actions.move_to_element_with_offset(searchButton, int(random.uniform(1,3)), int(random.uniform(1,3)))
+    actions.click()
+    
+    actions.perform()
+
+    for item in driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[4]/section/div/div[1]/section[2]/div[2]/ul/li/div[2]/div/a"):
+        if(review.itemTitle in item.text):
+            item.click()
+    #click the review button 
+    driver.find_element(By.XPATH, "//*[@id='__next']/main/div/section[1]/section/div[3]/section/section/div[3]/div[2]/div[2]/ul/li[1]/a").click()
+    
+    #click review this title
+    driver.find_element(By.XPATH, "//*[@id='main']/section/div[1]/div/a")
+
+    #get all the stars in the review bar 
+    reviewStarRatingBar = driver.find_elements(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[1]/div/a")
+
+    #click the one that corresponds to the rating out of ten
+    reviewStarRatingBar[review.rating].click()
+
+    #ensure that it was rated correctly the 1/10, 2/10 etc alert should pop up here
+    assert( f"{review.rating}/{review.rating}" in driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[2]/div/div/div").text)
+
+    #paste in headline 
+    driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[1]/input").send_keys(review.headline)
+
+    #paste in review body 
+    driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[2]/textarea").send_keys(review.reviewBody)
+    
+    #select spoilers option 
+    #TODO refactor this to be more concise
+    if(review.containsSpoilers):
+        #click spoilers yes button
+        driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[3]/div/ul/li[1]/span[1]").click()
+    else:
+        #click spoilers no button
+        driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[3]/div/ul/li[2]/span[1]").click()
+
+    #click the submit button
+    driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[2]/span/span/input").click()
+
+    
+
+#TODO test this
 def addReviewToUserList(driver : webdriver.Chrome, itemToReview : str,  userCinemaListURL : str, reviewBody : str, validTags : dict[str,str]=None):
     """Submits a review to a specified user created list on imdb 
 

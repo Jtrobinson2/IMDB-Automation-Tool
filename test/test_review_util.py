@@ -53,7 +53,7 @@ class TestReviewUtil:
         with pytest.raises(ValueError) as error:  
             review_util.removeReviewMarkup("Example", None)
         assert str(error.value) == "Error: you must provide at least one type of tag you want to remove"
-    
+    #TODO refactor this test with new review fields
     def testIsReviewValid(self):
         validTags = {"[/spoiler]" : "[spoiler]", "[/b]": "[b]"}
         validReview = Review("Clean Headline", "Clean ReviewBody", True, False, True)
