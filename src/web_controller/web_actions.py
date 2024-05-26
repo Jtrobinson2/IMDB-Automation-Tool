@@ -97,8 +97,7 @@ def isLoggedIn(driver : webdriver) -> bool:
 
 #TODO implement this
 #TODO test this
-#TODO change driver from chrome
-def submitReview(driver : webdriver.Chrome, review : Review) -> bool:
+def submitReview(driver : webdriver, review : Review) -> bool:
     """Submits a review to a user's IMDB lists and the reviewed item's page
 
     Args:
@@ -140,10 +139,16 @@ def submitReview(driver : webdriver.Chrome, review : Review) -> bool:
     
     actions.perform()
 
+    itemFound = False
+
     for item in driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[4]/section/div/div[1]/section[2]/div[2]/ul/li/div[2]/div/a"):
         if(review.itemTitle in item.text):
             item.click()
+            itemFound = True
             break
+
+    if(not itemFound):
+        raise ValueError("Error: item wasn't found on search please give a valid item title exactly.")
     
     #click the review button 
     reviewButton = driver.find_element(By.XPATH, "//*[@id='__next']/main/div/section[1]/section/div[3]/section/section/div[3]/div[2]/div[2]/ul/li[1]/a")
@@ -155,19 +160,18 @@ def submitReview(driver : webdriver.Chrome, review : Review) -> bool:
     #click review this title
     driver.find_element(By.XPATH, "//*[@id='main']/section/div[1]/div/a").click()
 
+    #move the driver to the iframe the review elements are in
     driver.switch_to.frame(WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='cboxLoadedContent']/iframe"))))
 
     #get all the stars in the review bar 
     reviewStarRatingBar = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[1]/div")))
-     
-    reviewStarRatingBar.find_elements(By.CLASS_NAME, "ice-star-wrapper")
+    ratingStars = reviewStarRatingBar.find_elements(By.CLASS_NAME, "ice-star-wrapper")
 
     #click the one that corresponds to the rating out of ten
-    #TODO code crashes here web element is not subscriptable
-    reviewStarRatingBar[review.rating - 1].click()
+    ratingStars[review.rating - 1].click()
 
     #ensure that it was rated correctly the 1/10, 2/10 etc alert should pop up here
-    assert( f"{review.rating}/{review.rating}" in driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[2]/div/div/div").text)
+    assert( f"{review.rating}/{review.rating}" in WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[2]/div/div/div"))).text)
 
     #paste in headline 
     driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[1]/input").send_keys(review.headline)
@@ -175,17 +179,15 @@ def submitReview(driver : webdriver.Chrome, review : Review) -> bool:
     #paste in review body 
     driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[2]/textarea").send_keys(review.reviewBody)
     
-    #select spoilers option 
-    #TODO refactor this to be more concise
-    if(review.containsSpoilers):
-        #click spoilers yes button
-        driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[3]/div/ul/li[1]/span[1]").click()
-    else:
-        #click spoilers no button
-        driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[3]/div/ul/li[2]/span[1]").click()
+    #select spoilers option (yes or no)
+    spoilerButtonID = 1 if review.containsSpoilers else 2
+    driver.find_element(By.XPATH, f"//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[3]/div/ul/li[{spoilerButtonID}]/span[1]").click()
 
     #click the submit button
     driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[2]/span/span/input").click()
+
+    #ensure it was submitted correctly
+    "Submission already processed" in WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div/div/div[2]/span[4]"))).get_attribute("innerHTML")
 
     
 

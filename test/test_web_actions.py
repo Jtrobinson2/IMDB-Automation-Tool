@@ -21,6 +21,7 @@ def loggedInDriver():
     driver = webdriver.Chrome(options=chrome_options)
     web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
     yield driver
+    #TODO: this isn't replenishing the watchilst for some reason
     TestWebActionsLoginRequired.resetWatchlistAfterRemoval(driver, "https://www.imdb.com/user/ur181375520/watchlist/", "Frieren: Beyond Journey's End")
     driver.quit()
     

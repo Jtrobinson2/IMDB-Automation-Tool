@@ -27,7 +27,7 @@ Why did he even decide to to become a death eater. Last movie he was teaching Ha
 The revelation of the half blood prince as well as Dumbledore's death was weirdly anticlimactic since one revelation had zero leadup and the other suspends your disbelief that the most powerful wizard alive would go down to Snape without a fight. 
 One could argue this is ok because he was weakened but a weakened master should still solo an advanced magic user. This entry was a tonal mess, that relied to heavily on corny interpersonal 
 conflicts however we got to see more of Tom riddle pre-deformation which was the highlight of this film."""
-itemTitle = "Frieren: Beyond Journey's End"
+itemTitle = "Star Trek: Discovery"
 
 web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
-web_actions.submitReview(driver, Review("This is a test headline", reviewBody, True, False, itemTitle, 10, False))
+web_actions.submitReview(driver, Review("This is a test headline", reviewBody, True, False, itemTitle, 1, True))
