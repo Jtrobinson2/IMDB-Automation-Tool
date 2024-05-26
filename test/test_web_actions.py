@@ -41,7 +41,7 @@ class TestWebActionsLoginRequired:
         One could argue this is ok because he was weakened but a weakened master should still solo an advanced magic user. This entry was a tonal mess, that relied to heavily on corny interpersonal 
         conflicts however we got to see more of Tom riddle pre-deformation which was the highlight of this film."""
         itemTitle = "Avatar"
-        validReview = Review(headline, reviewBody, True, False, itemTitle, 7, True)
+        validReview = Review(itemTitle, headline, reviewBody, True, False,  7, True)
 
         #test invalid arguments
         with pytest.raises(ValueError) as error:  

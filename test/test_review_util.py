@@ -53,19 +53,22 @@ class TestReviewUtil:
         with pytest.raises(ValueError) as error:  
             review_util.removeReviewMarkup("Example", None)
         assert str(error.value) == "Error: you must provide at least one type of tag you want to remove"
-    #TODO refactor this test with new review fields
+
+
     def testIsReviewValid(self):
         validTags = {"[/spoiler]" : "[spoiler]", "[/b]": "[b]"}
-        validReview = Review("Clean Headline", "Clean ReviewBody", True, False, True)
-        invalidReviewProfaneHeadline = Review("Profane ass headline you CUCK!", "Clean ReviewBody", True, False, True)
-        invalidReviewProfaneBody = Review("Clean Headline", "Profane as fuck body", True, False, True)
-        invalidReviewEmptyHeadline = Review("", "Clean ReviewBody", True, False, True)
-        invalidReviewNoneHeadline = Review(None, "Clean ReviewBody", True, False, True)
-        invalidReviewEmptyBody = Review("Clean Headline", "", True, False, True)
-        invalidReviewNoneBody = Review("Clean Headline", None, True, False, True)
-        invalidReviewNotShowOrMovie = Review("Clean Headline", "Clean ReviewBody", False, False, True)
-        invalidReviewBadMarkup = Review("Clean Headline", "This has [b] bad markup [b] [/spoiler] [spoiiler] [/b]", True, False, True)
-        invalidReviewTooShort = Review(".", ".", True, False, True)
+        validReview = Review("Item Title", "Clean Headline", "Clean ReviewBody", True, False, True)
+        invalidReviewNoneItemTitle = Review(None, "Profane ass headline you CUCK!", "Clean ReviewBody", True, False, True)
+        invalidReviewEmptyItemTitle = Review("", "Profane ass headline you CUCK!", "Clean ReviewBody", True, False, True)
+        invalidReviewProfaneHeadline = Review("Item Title", "Profane ass headline you CUCK!", "Clean ReviewBody", True, False, True)
+        invalidReviewProfaneBody = Review("Item Title", "Clean Headline", "Profane as fuck body", True, False, True)
+        invalidReviewEmptyHeadline = Review("Item Title", "", "Clean ReviewBody", True, False, True)
+        invalidReviewNoneHeadline = Review("Item Title", None, "Clean ReviewBody", True, False, True)
+        invalidReviewEmptyBody = Review("Item Title", "Clean Headline", "", True, False, True)
+        invalidReviewNoneBody = Review("Item Title", "Clean Headline", None, True, False, True)
+        invalidReviewNotShowOrMovie = Review("Item Title", "Clean Headline", "Clean ReviewBody", False, False, True)
+        invalidReviewBadMarkup = Review("Item Title", "Clean Headline", "This has [b] bad markup [b] [/spoiler] [spoiiler] [/b]", True, False, True)
+        invalidReviewTooShort = Review("Item Title", ".", ".", True, False, True)
 
         assert review_util.isReviewValid(validReview, validTags, 1)
 
@@ -97,4 +100,12 @@ class TestReviewUtil:
         with pytest.raises(ValueError) as error:  
             review_util.isReviewValid(invalidReviewNotShowOrMovie, validTags, 1)
         assert str(error.value) == "Error: review must be marked as either a TV show or a Movie."
+
+        with pytest.raises(ValueError) as error:  
+            review_util.isReviewValid(invalidReviewEmptyItemTitle, validTags, 1)
+        assert str(error.value) == "Error: review must have the title of the item being reviewed."
+
+        with pytest.raises(ValueError) as error:  
+            review_util.isReviewValid(invalidReviewNoneItemTitle, validTags, 1)
+        assert str(error.value) == "Error: review must have the title of the item being reviewed."
                                 

@@ -168,7 +168,7 @@ def submitReview(driver : webdriver, review : Review) -> bool:
     ratingStars[review.rating - 1].click()
 
     #ensure that it was rated correctly the 1/10, 2/10 etc alert should pop up here
-    assert( f"{review.rating}/{10}" in WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[2]/div/div/div"))).text)
+    assert( f"{review.rating}/{10}" in WebDriverWait(driver, 2).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[2]/div/div/div"))).text)
 
     #paste in headline 
     driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[1]/input").send_keys(review.headline)
