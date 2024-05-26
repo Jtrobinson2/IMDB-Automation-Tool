@@ -116,7 +116,7 @@ def submitReview(driver : webdriver.Chrome, review : Review) -> bool:
     if(not isLoggedIn(driver)):
         raise LoginError("Error: user must be logged in submit review.")
     #TODO: maybe refactor is review valid to just through value errors instead
-    inspectionResults = util.isReviewValid(review, {"[spoiler]", "[/spoiler]", "[b]", "[/b]"})
+    inspectionResults = util.isReviewValid(review, {"[/spoiler]" : "[spoiler]", "[/b]" : "[b]"})
     if(not inspectionResults[0]):
         raise ValueError(inspectionResults[1])
     
@@ -143,17 +143,28 @@ def submitReview(driver : webdriver.Chrome, review : Review) -> bool:
     for item in driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[4]/section/div/div[1]/section[2]/div[2]/ul/li/div[2]/div/a"):
         if(review.itemTitle in item.text):
             item.click()
+            break
+    
     #click the review button 
-    driver.find_element(By.XPATH, "//*[@id='__next']/main/div/section[1]/section/div[3]/section/section/div[3]/div[2]/div[2]/ul/li[1]/a").click()
+    reviewButton = driver.find_element(By.XPATH, "//*[@id='__next']/main/div/section[1]/section/div[3]/section/section/div[3]/div[2]/div[2]/ul/li[1]/a")
+    actions.scroll_to_element(reviewButton)
+    actions.click(reviewButton)
+    actions.perform()
+    
     
     #click review this title
-    driver.find_element(By.XPATH, "//*[@id='main']/section/div[1]/div/a")
+    driver.find_element(By.XPATH, "//*[@id='main']/section/div[1]/div/a").click()
+
+    driver.switch_to.frame(WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='cboxLoadedContent']/iframe"))))
 
     #get all the stars in the review bar 
-    reviewStarRatingBar = driver.find_elements(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[1]/div/a")
+    reviewStarRatingBar = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[1]/div")))
+     
+    reviewStarRatingBar.find_elements(By.CLASS_NAME, "ice-star-wrapper")
 
     #click the one that corresponds to the rating out of ten
-    reviewStarRatingBar[review.rating].click()
+    #TODO code crashes here web element is not subscriptable
+    reviewStarRatingBar[review.rating - 1].click()
 
     #ensure that it was rated correctly the 1/10, 2/10 etc alert should pop up here
     assert( f"{review.rating}/{review.rating}" in driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[2]/div/div/div").text)

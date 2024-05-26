@@ -56,7 +56,7 @@ def isReviewValid(review : Review, validTags = dict[str, str], minReviewLength=6
     if(len(review.reviewBody) < minReviewLength):
         return False, "Error, review is smaller than the min review length allowed on IMDB."
     
-    return True
+    return True, None
 
 
 def validateMarkup(markupString : str, validTags : dict[str,str]) -> bool:
