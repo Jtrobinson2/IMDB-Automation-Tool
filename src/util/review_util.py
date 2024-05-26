@@ -56,6 +56,10 @@ def isReviewValid(review : Review, validTags = dict[str, str], minReviewLength=6
     if(len(review.reviewBody) < minReviewLength):
         return False, "Error, review is smaller than the min review length allowed on IMDB."
     
+    #TODO check that rating is not less than 0 
+
+    #TODO check that the item title isn't none or empty 
+    
     return True, None
 
 

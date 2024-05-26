@@ -93,10 +93,7 @@ def isLoggedIn(driver : webdriver) -> bool:
     except NoSuchElementException:
         return False
     
-
-
-#TODO implement this
-#TODO test this
+    
 def submitReview(driver : webdriver, review : Review) -> bool:
     """Submits a review to a user's IMDB lists and the reviewed item's page
 
@@ -171,7 +168,7 @@ def submitReview(driver : webdriver, review : Review) -> bool:
     ratingStars[review.rating - 1].click()
 
     #ensure that it was rated correctly the 1/10, 2/10 etc alert should pop up here
-    assert( f"{review.rating}/{review.rating}" in WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[2]/div/div/div"))).text)
+    assert( f"{review.rating}/{10}" in WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[3]/div[2]/div/div/div"))).text)
 
     #paste in headline 
     driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div[5]/div[1]/input").send_keys(review.headline)
@@ -187,12 +184,12 @@ def submitReview(driver : webdriver, review : Review) -> bool:
     driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[2]/span/span/input").click()
 
     #ensure it was submitted correctly
-    "Submission already processed" in WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div/div/div[2]/span[4]"))).get_attribute("innerHTML")
+    return "Submission" in WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div/div/div[2]/span[4]"))).get_attribute("innerHTML")
 
     
 
 #TODO test this
-def addReviewToUserList(driver : webdriver.Chrome, itemToReview : str,  userCinemaListURL : str, reviewBody : str, validTags : dict[str,str]=None):
+def addReviewToUserList(driver : webdriver, itemToReview : str,  userCinemaListURL : str, reviewBody : str, validTags : dict[str,str]=None):
     """Submits a review to a specified user created list on imdb 
 
     Args:
