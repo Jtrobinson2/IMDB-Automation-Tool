@@ -109,7 +109,9 @@ class TestWebActionsLoginRequired:
         
         actions.perform()
 
-        searchResultListItems = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[3]/section/div/div[1]/section[2]/div[2]/ul/li[contains(@class, 'ipc-metadata-list-summary-item ipc-metadata-list-summary-item--click find-result-item find-title-result')]/div[2]/div/a")
+
+
+        searchResultListItems = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[4]/section/div/div[1]/section[2]/div[2]/ul/li/div[2]/div/a")
         
         for item in searchResultListItems:
             if(item.text == removedItem):
