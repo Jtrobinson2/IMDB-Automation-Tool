@@ -9,7 +9,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common import NoSuchElementException
 from src.web_controller.web_actions import sendKeysLikeHuman
+
 import random 
 
 
@@ -22,9 +24,8 @@ def loggedInDriver():
     driver = webdriver.Chrome(options=chrome_options)
     web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
     yield driver
-    #TODO: this isn't replenishing the watchilst for some reason
-    print("running code post yield")
     assert TestWebActionsLoginRequired.resetWatchlistAfterRemoval(driver, "https://www.imdb.com/user/ur181375520/watchlist/", "Frieren: Beyond Journey's End")
+    assert TestWebActionsLoginRequired.resetTestUserListAfterAddition(driver, "https://www.imdb.com/list/ls545984321/edit/?ref_=ls_ov", "Rise of the Planet of the Apes (2011)")
     driver.quit()
     
 class TestWebActionsLoginRequired: 
@@ -57,7 +58,43 @@ class TestWebActionsLoginRequired:
         #test reviewing valid item
         validReview.itemTitle = itemTitle
         assert web_actions.submitReview(loggedInDriver, validReview)
-    
+
+    def testAddItemToUserList(self, loggedInDriver):
+        #test invalid arguments
+        with pytest.raises(ValueError) as error:  
+            web_actions.addReviewToUserList(None, "Rise of the Planet of the Apes (2011)", "https://imdb.com/list/ls545984321/?ref_=uspf_t_1", "this movie is good", None)
+        assert str(error.value) == "Error: provide a valid driver."
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.addReviewToUserList(loggedInDriver, "", "https://imdb.com/list/ls545984321/?ref_=uspf_t_1", "this movie is good", None)
+        assert str(error.value) == "Error: item to review not provided."
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.addReviewToUserList(loggedInDriver, None, "https://imdb.com/list/ls545984321/?ref_=uspf_t_1", "this movie is good", None)
+        assert str(error.value) == "Error: item to review not provided."
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.addReviewToUserList(loggedInDriver, "Rise of the Planet of the Apes (2011)", "", "this movie is good", None)
+        assert str(error.value) == "Error: watchlist URL cannot be empty or none."
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.addReviewToUserList(loggedInDriver, "Rise of the Planet of the Apes (2011)", None, "this movie is good", None)
+        assert str(error.value) == "Error: watchlist URL cannot be empty or none."
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.addReviewToUserList(loggedInDriver, "Rise of the Planet of the Apes (2011)", "https://imdb.com/list/ls545984321/?ref_=uspf_t_1", "", None)
+        assert str(error.value) == "Error: review body cannot be empty or none."
+
+        with pytest.raises(ValueError) as error:  
+            web_actions.addReviewToUserList(loggedInDriver, "Rise of the Planet of the Apes (2011)", "https://imdb.com/list/ls545984321/?ref_=uspf_t_1", None, None)
+        assert str(error.value) == "Error: review body cannot be empty or none."
+
+        #try to add a cinmema item to the review list that doesn't exist 
+        assert not web_actions.addReviewToUserList(loggedInDriver, "Rise of the Planet of the Apes (2066)", "https://imdb.com/list/ls545984321/?ref_=uspf_t_1", "this movie is good", None)
+
+        #add a valid review item
+        assert web_actions.addReviewToUserList(loggedInDriver, "Rise of the Planet of the Apes (2011)", "https://imdb.com/list/ls545984321/?ref_=uspf_t_1", "this movie is good", None)
+
     def testRemoveFromWatchlist(self, loggedInDriver):
         #Invalid arguments
         with pytest.raises(ValueError) as error:  
@@ -109,8 +146,6 @@ class TestWebActionsLoginRequired:
         
         actions.perform()
 
-
-
         searchResultListItems = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[4]/section/div/div[1]/section[2]/div[2]/ul/li/div[2]/div/a")
         
         for item in searchResultListItems:
@@ -121,6 +156,52 @@ class TestWebActionsLoginRequired:
                 return True 
         
         return False
+    
+    def resetTestUserListAfterAddition(driver : webdriver,  watchlistURL : str, addedItem : str)-> bool:
+        """Resets the test user list by removing the cinema item we added to it for subsequent tests
+            
+            Args:
+                addedItem (str) : added cinema item you want to re-add to the watchlist
+                driver (webdriver) : web driver
+            Returns:
+                bool: True if the item was removed from the user list  successfully
+            Raises:
+                ValueError : if addedItem is none or empty
+                ValueError : if web driver is  none or empty
+        """
+        if(not addedItem):
+            raise ValueError("Error: item that was added to the user list was not provided")
+        if(not driver):
+            raise ValueError("Error: you must provide a web driver")
+        if(not watchlistURL):
+            raise ValueError("Error: you need to provide the watchlist to remove from.")
+        #if your signed in and use this url it will pull up the test list already in edit mode from the previous test
+        driver.get(watchlistURL)
+
+        listItems = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div/ul/div/li/div[2]/div/div/div[1]/a/h3")
+        assert listItems
+
+        #find the cinema item in the new dropdown list
+        for index, item in enumerate(listItems):
+            #slicing off the year from the itemToReview string (test (2011) -> test )
+            if(addedItem[:-7] in item.text):
+                #click the items checkbox
+                itemcheckbox = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.XPATH, f"//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[4]/ul/div[{index + 1}]/li/div[1]/div[1]/span/span/input")))
+                driver.execute_script("arguments[0].click();", itemcheckbox)
+                #click delete
+                deleteButton  = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.XPATH, f"//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div[3]/div[2]/button[3]"))) 
+                driver.execute_script("arguments[0].click();", deleteButton)
+                #click confirm to delete
+                confirmDeleteButton  = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, f"/html/body/div[6]/div[2]/div/div[2]/div/div[2]/button[2]")))
+                driver.execute_script("arguments[0].click();", confirmDeleteButton)
+                break
+                
+        # check if the item was actually removed
+        try:
+            driver.find_element(By.XPATH, "/html/body/section")
+            return True
+        except NoSuchElementException:
+            return False
 
 
 #driver to be used for all web actions that don't require loggin in. Destroyed when those tests are done.

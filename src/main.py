@@ -18,5 +18,7 @@ chrome_options.add_experimental_option("detach", True)
 chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
 driver = webdriver.Chrome(options=chrome_options)
 
-
 web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
+
+
+

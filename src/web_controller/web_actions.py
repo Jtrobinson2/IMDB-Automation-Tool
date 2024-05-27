@@ -184,11 +184,11 @@ def submitReview(driver : webdriver, review : Review) -> bool:
     driver.find_element(By.XPATH, "//*[@id='react-entry-point']/div/div/div[2]/span/span/input").click()
 
     #ensure it was submitted correctly
-    return "Submission" in WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div/div/div[2]/span[4]"))).get_attribute("innerHTML")
+    return "Submission" in WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='react-entry-point']/div/div/div[1]/div/div/div[2]/span[4]"))).get_attribute("innerHTML")
 
     
 
-#TODO test this
+
 def addReviewToUserList(driver : webdriver, itemToReview : str,  userCinemaListURL : str, reviewBody : str, validTags : dict[str,str]=None):
     """Submits a review to a specified user created list on imdb 
 
@@ -239,10 +239,15 @@ def addReviewToUserList(driver : webdriver, itemToReview : str,  userCinemaListU
     driver.find_element(By.XPATH, "//*[starts-with(@id, 'text-input')]").click()
 
     #find the cinema item from the dropdown and click it
+    itemFound = False
     for result in driver.find_elements(By.XPATH, "//*[starts-with(@id, 'react-autowhatever-1--item-')]"):
         if(result.text == itemToReview):
             result.click()
+            itemFound = True
             break
+    
+    if(not itemFound):
+        return False
         
     #wait until the new item has been actually added to the list (this is a snackbar that shows indicated success)
     WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, "/html/body/section")))
