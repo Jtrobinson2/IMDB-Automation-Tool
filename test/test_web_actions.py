@@ -241,6 +241,9 @@ class TestWebActionsNoLogin:
 
 
     def testLoginAndIsLoggedIn(self, driver):
+        #test isloggedin when we aren't logged in
+        assert not web_actions.isLoggedIn(driver)
+
         #invalid parameters
         with pytest.raises(ValueError) as error:  
             web_actions.login(None, "invalidUser@gmail.com", "wrongPass", "WrongAccountName")

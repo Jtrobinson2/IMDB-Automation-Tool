@@ -250,7 +250,7 @@ def addReviewToUserList(driver : webdriver, itemToReview : str,  userCinemaListU
         return False
         
     #wait until the new item has been actually added to the list (this is a snackbar that shows indicated success)
-    WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, "/html/body/section")))
+    WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.XPATH, "/html/body/section")))
     listItemsAfterAddition = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div/section/div/section/div/div[1]/section/div/ul/div/li/div[2]/div/div/div[1]/a/h3")
 
     #find the cinema item in the new dropdown list

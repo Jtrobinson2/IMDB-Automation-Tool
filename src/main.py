@@ -21,4 +21,4 @@ driver = webdriver.Chrome(options=chrome_options)
 web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
 
 
-
+#TODO check the coverage of the tests before moving on to the ui
