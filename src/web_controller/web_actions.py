@@ -309,7 +309,7 @@ def getCinemaItems(driver : webdriver, cinemaItemTitle : str) -> list[str]:
     actions.click()
     
     actions.perform()
-    searchResultListItems = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[4]/section/div/div[1]/section[2]/div[2]/ul/li/div[2]/div/a")
+    searchResultListItems = driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div/section/div/div[1]/section[2]/div[2]/ul/li/div[2]/div/a")
 
     return  [item.text for item in searchResultListItems]
 
