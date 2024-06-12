@@ -231,13 +231,12 @@ class TestWebActionsNoLogin:
             web_actions.getCinemaItems(driver, None)
         assert str(error.value) == "Error: cinema item title cannot be empty"
 
-        # only checks the first five elements because the rest are liable to change often
-        firstFiveFrierenResults = ["Frieren: Beyond Journey's End", 'Frieren', 'Soso no Frieren: Mini Anime', 
-                       'The Suitor', 'Kleine frieren auch im Sommer']
+        # only checks the first two elements because the rest are liable to change often
+        firstFiveFrierenResults = ["Frieren: Beyond Journey's End", 'Frieren']
         
         actualList = web_actions.getCinemaItems(driver, "Frieren")     
         assert len(actualList) > len(firstFiveFrierenResults)
-        assert  actualList[:5] == firstFiveFrierenResults[:5]
+        assert  actualList[:2] == firstFiveFrierenResults[:2]
 
 
     def testLoginAndIsLoggedIn(self, driver):

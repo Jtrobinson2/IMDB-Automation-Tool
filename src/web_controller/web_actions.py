@@ -138,7 +138,7 @@ def submitReview(driver : webdriver, review : Review) -> bool:
 
     itemFound = False
 
-    for item in driver.find_elements(By.XPATH, "//*[@id='__next']/main/div[2]/div[4]/section/div/div[1]/section[2]/div[2]/ul/li/div[2]/div/a"):
+    for item in driver.find_elements(By.XPATH, "//*[@id='__next']/main/div/div/section/div/div/section/div/ul/li/div/div/a"):
         if(review.itemTitle in item.text):
             item.click()
             itemFound = True
