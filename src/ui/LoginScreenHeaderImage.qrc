@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="LoginScreenHeaderImage">
+    <file>LoginScreenHeaderImage.PNG</file>
+  </qresource>
+</RCC>
