@@ -45,7 +45,7 @@
      <item row="0" column="0">
       <widget class="QStackedWidget" name="stackedWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="LoginPage">
         <widget class="QLineEdit" name="UsernameLineEdit">
@@ -198,6 +198,54 @@
           <bool>true</bool>
          </property>
         </widget>
+        <widget class="QLabel" name="SignInButtonErrorLabel">
+         <property name="geometry">
+          <rect>
+           <x>130</x>
+           <y>520</y>
+           <width>551</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+           <underline>false</underline>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #C40000;</string>
+         </property>
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="LoadingIcon">
+         <property name="geometry">
+          <rect>
+           <x>350</x>
+           <y>540</y>
+           <width>51</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+           <underline>false</underline>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #C40000;</string>
+         </property>
+         <property name="text">
+          <string>Loading Icon</string>
+         </property>
+        </widget>
        </widget>
        <widget class="QWidget" name="TitleSelectPage">
         <widget class="QLabel" name="SelectTitleHeader">
@@ -273,6 +321,30 @@
          </property>
          <property name="scaledContents">
           <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLabel" name="LoadingIconSelectTitleScreen">
+         <property name="geometry">
+          <rect>
+           <x>360</x>
+           <y>350</y>
+           <width>51</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+           <underline>false</underline>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #C40000;</string>
+         </property>
+         <property name="text">
+          <string>Loading Icon</string>
          </property>
         </widget>
        </widget>
@@ -510,6 +582,30 @@
          </property>
          <property name="scaledContents">
           <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLabel" name="LoadingIconReviewTitleScreen">
+         <property name="geometry">
+          <rect>
+           <x>380</x>
+           <y>490</y>
+           <width>51</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+           <underline>false</underline>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #C40000;</string>
+         </property>
+         <property name="text">
+          <string>Loading Icon</string>
          </property>
         </widget>
        </widget>

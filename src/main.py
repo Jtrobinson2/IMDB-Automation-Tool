@@ -12,6 +12,9 @@ from src.model.review import Review
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from src.util import Configuration
+from src.ui.MainWindow import Ui_MainWindow
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 
 #TODO correct profile is opened but session not created exception persists will dry downloading and updating chrome driver
@@ -31,3 +34,22 @@ driver = webdriver.Chrome(options=chrome_options)
 # web_actions.login(driver, "03jrob@gmail.com", "testpass", "TestAccount")
 web_actions.isLoggedIn(driver)
 
+    
+def signIn():
+    """The click listener sent to the sign in button. It chekcs the input fields for valid data and showing the appropriate errors to the UI
+    """
+    
+
+    #todo finish this click listener
+
+    
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
+
+    
